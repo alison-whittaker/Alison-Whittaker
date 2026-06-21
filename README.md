@@ -1,16 +1,24 @@
-## Hi there 👋
+# Alison Whittaker Portfolio
 
-<!--
-**alison-whittaker/alison-whittaker** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+A responsive static portfolio built with HTML, CSS, and vanilla JavaScript.
 
-Here are some ideas to get you started:
+## Preview
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+Open `index.html` in a browser, or run a local static server from this folder.
+
+## Publish with GitHub Pages
+
+1. Create a GitHub repository.
+2. Upload the contents of this folder to the repository root.
+3. In **Settings → Pages**, choose **Deploy from a branch**.
+4. Select the `main` branch and `/ (root)` folder.
+
+The site has no build step or external dependencies.
+
+## Update
+
+- Page content: `index.html`
+- Colors and layout: `styles.css`
+- Mobile menu: `script.js`
+- Header portrait: `assets/alison-whittaker-profile.png`
+- Downloadable résumé: `assets/Alison-Whittaker-Resume-2026.pdf`
