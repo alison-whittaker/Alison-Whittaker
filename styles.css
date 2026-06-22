@@ -546,6 +546,10 @@ h1 {
   background: var(--surface);
 }
 
+.search-grid .tools-card {
+  grid-column: 1 / -1;
+}
+
 .search-grid h3 {
   margin: 0 0 18px;
   color: var(--forest);
@@ -556,6 +560,43 @@ h1 {
   margin: 0;
   color: var(--muted);
   line-height: 1.8;
+}
+
+.tools-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  margin: 0;
+}
+
+.tools-list div {
+  padding: 0 22px;
+  border-left: 1px solid var(--line);
+}
+
+.tools-list div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.tools-list div:last-child {
+  padding-right: 0;
+}
+
+.tools-list dt {
+  margin-bottom: 10px;
+  color: var(--forest);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.tools-list dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: .88rem;
+  line-height: 1.65;
 }
 
 .contact-section {
@@ -604,6 +645,9 @@ footer { padding-block: 28px; background: var(--cocoa); color: #f5ece7; }
   .recognition-layout { grid-template-columns: 1fr; }
   .testimonial-card { min-height: 460px; }
   .search-grid { grid-template-columns: 1fr; }
+  .tools-list { grid-template-columns: 1fr 1fr; gap: 24px 0; }
+  .tools-list div, .tools-list div:first-child, .tools-list div:last-child { padding: 0 20px; border-left: 1px solid var(--line); }
+  .tools-list div:nth-child(odd) { padding-left: 0; border-left: 0; }
 }
 
 @media (max-width: 680px) {
@@ -653,6 +697,13 @@ footer { padding-block: 28px; background: var(--cocoa); color: #f5ece7; }
   .contact-link { align-items: flex-start; flex-direction: column; }
   .contact-link strong { text-align: left; }
   .footer-inner { flex-direction: column; }
+  .tools-list { grid-template-columns: 1fr; }
+  .tools-list div, .tools-list div:first-child, .tools-list div:last-child, .tools-list div:nth-child(odd) {
+    padding: 20px 0 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+  .tools-list div:first-child { padding-top: 0; border-top: 0; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
