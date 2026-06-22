@@ -411,14 +411,14 @@ h1 {
 
 .recognition-layout {
   display: grid;
-  grid-template-columns: .82fr 1.18fr;
+  grid-template-columns: 1.08fr .92fr;
   gap: 18px;
   align-items: stretch;
 }
 
 .testimonial-card {
   display: flex;
-  min-height: 560px;
+  min-height: 610px;
   flex-direction: column;
   justify-content: space-between;
   margin: 0;
@@ -437,10 +437,22 @@ h1 {
 .testimonial-card > p {
   margin: auto 0;
   color: var(--ink);
-  font-size: clamp(2rem, 3.6vw, 3.25rem);
+  font-size: clamp(1.55rem, 2.45vw, 2.35rem);
   font-weight: 720;
   letter-spacing: -.05em;
-  line-height: 1.06;
+  line-height: 1.13;
+}
+
+.testimonial-card-secondary {
+  background: #e4f1ec;
+}
+
+.testimonial-card-secondary .quote-mark {
+  color: var(--forest);
+}
+
+.testimonial-card-secondary footer {
+  border-color: #aacfc4;
 }
 
 .testimonial-card footer {
@@ -458,7 +470,27 @@ h1 {
   font-size: .75rem;
 }
 
+.awards-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  margin: 72px 0 26px;
+}
+
+.awards-heading .eyebrow {
+  margin-bottom: 0;
+}
+
+.awards-heading h3 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  letter-spacing: -.04em;
+}
+
 .award-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -474,7 +506,8 @@ h1 {
   border-bottom: 1px solid var(--line);
 }
 
-.award-list article:last-child { border-bottom: 0; }
+.award-list article:nth-child(odd) { border-right: 1px solid var(--line); }
+.award-list article:nth-last-child(-n + 2) { border-bottom: 0; }
 
 .award-year {
   color: var(--accent);
@@ -643,7 +676,7 @@ footer { padding-block: 28px; background: var(--cocoa); color: #f5ece7; }
   .impact-card-large { grid-row: auto; min-height: 320px; }
   .impact-card-large h3 { margin-top: 60px; }
   .recognition-layout { grid-template-columns: 1fr; }
-  .testimonial-card { min-height: 460px; }
+  .testimonial-card { min-height: 500px; }
   .search-grid { grid-template-columns: 1fr; }
   .tools-list { grid-template-columns: 1fr 1fr; gap: 24px 0; }
   .tools-list div, .tools-list div:first-child, .tools-list div:last-child { padding: 0 20px; border-left: 1px solid var(--line); }
@@ -691,7 +724,12 @@ footer { padding-block: 28px; background: var(--cocoa); color: #f5ece7; }
   .impact-card, .impact-card-large { min-height: 290px; }
   .impact-card h3 { margin-top: 65px; }
   .testimonial-card { min-height: 430px; padding: 28px; }
-  .award-list article { grid-template-columns: 1fr; gap: 10px; padding: 24px; }
+  .awards-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .award-list { grid-template-columns: 1fr; }
+  .award-list article { grid-template-columns: 1fr; gap: 10px; padding: 24px; border-right: 0; }
+  .award-list article:nth-child(odd) { border-right: 0; }
+  .award-list article:nth-last-child(-n + 2) { border-bottom: 1px solid var(--line); }
+  .award-list article:last-child { border-bottom: 0; }
   .approach-steps { grid-template-columns: 1fr; }
   .contact-section { padding-block: 80px; }
   .contact-link { align-items: flex-start; flex-direction: column; }
