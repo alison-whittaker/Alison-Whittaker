@@ -1,15 +1,13 @@
-# Alison Whittaker Portfolio
+# GitHub Profile Assets
 
-Deploy-ready GitHub Pages site for `https://alison-whittaker.github.io/`.
+Use these files for Alison Whittaker's GitHub profile and GitHub Pages site.
 
-## Publish
+## Files
 
-Upload every file in this folder directly to the root of the `alison-whittaker.github.io` repository:
+- `github-avatar-white-bg.jpg` - Recommended for uploading as the GitHub account profile photo. JPEG avoids transparency artifacts that can appear as black around circular masks.
+- `alison-whittaker-profile.png` - Recommended for the GitHub Pages repository/site image asset. It is square and ready for CSS circular cropping.
 
-- `index.html`
-- `styles.css`
-- `script.js`
-- `alison-whittaker-profile.png`
-- `Alison-Whittaker-Resume-2026.pdf`
+## Upload Targets
 
-Do not upload the enclosing folder. All site assets intentionally live at the repository root.
+- GitHub profile avatar: GitHub profile settings > Change avatar > upload `github-avatar-white-bg.jpg`
+- GitHub Pages site: replace the site image asset with `alison-whittaker-profile.png`
