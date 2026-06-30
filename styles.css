@@ -509,6 +509,33 @@ h1 {
   border-color: var(--cocoa);
 }
 
+/* Secondary prototype cards */
+.prototype-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+.prototype-card-secondary {
+  background: var(--surface);
+  border-color: var(--line);
+}
+.prototype-card-secondary h3 {
+  font-size: 1.05rem;
+}
+.pf-compact {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.pf-compact .pf-item { padding: 10px 12px; }
+.pf-compact .pf-icon { font-size: .95rem; }
+.pf-compact .pf-item strong { font-size: .82rem; }
+.pf-compact .pf-item span { font-size: .77rem; }
+
+@media (max-width: 900px) {
+  .prototype-secondary-grid { grid-template-columns: 1fr; }
+}
+
 /* ── END PROTOTYPES ─────────────────────────────────── */
 
 .impact-section {

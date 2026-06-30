@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Change Management Readiness Tracker · Alison Whittaker</title>
+  <style>
+    :root {
+      --ink:#3d2924; --accent:#3d9a82; --forest:#2f7566; --lime:#cce8dd;
+      --paper:#f8f5f1; --surface:#fff; --line:#e8e0d6; --muted:#7a6560;
+      --red:#b83020; --amber:#9a6e00; --red-soft:#fdf1ef; --amber-soft:#fdf6e4;
+      --radius:20px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
+
+    .proto-header{display:flex;justify-content:space-between;align-items:center;padding:14px 32px;background:var(--ink);gap:20px;}
+    .ph-left{display:flex;align-items:center;gap:16px;}
+    .ph-back{color:rgba(255,255,255,.6);text-decoration:none;font-size:.82rem;font-weight:600;border:1px solid rgba(255,255,255,.15);padding:5px 12px;border-radius:99px;transition:all .15s;white-space:nowrap;}
+    .ph-back:hover{color:#fff;border-color:rgba(255,255,255,.35);}
+    .ph-meta{display:flex;flex-direction:column;gap:1px;}
+    .ph-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);}
+    .ph-title{font-size:1rem;font-weight:700;color:#fff;}
+    .ph-badge{display:flex;align-items:center;gap:7px;font-size:.73rem;font-weight:700;color:var(--lime);border:1px solid rgba(204,232,221,.3);padding:5px 12px;border-radius:99px;white-space:nowrap;}
+    .ai-pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+    .suite-bar{display:flex;align-items:center;gap:20px;padding:8px 32px;background:#2a1c18;border-bottom:1px solid rgba(255,255,255,.06);overflow-x:auto;}
+    .sb-label{font-size:.67rem;font-weight:800;letter-spacing:.08em;color:rgba(255,255,255,.3);text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
+    .sb-links{display:flex;gap:3px;}
+    .sb-link{font-size:.77rem;font-weight:600;color:rgba(255,255,255,.5);padding:4px 12px;border-radius:99px;text-decoration:none;transition:all .15s;white-space:nowrap;}
+    .sb-link:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.08);}
+    .sb-link.active{color:var(--ink);background:var(--lime);}
+
+    .tab-bar{display:flex;gap:4px;padding:12px 32px;background:var(--surface);border-bottom:1px solid var(--line);overflow-x:auto;}
+    .tab-btn{padding:8px 18px;border:1px solid transparent;border-radius:99px;background:none;font-size:.83rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+    .tab-btn:hover{color:var(--ink);background:var(--paper);}
+    .tab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+    .proto-main{flex:1;padding:28px 32px;max-width:1180px;width:100%;margin:0 auto;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+
+    .panel-header{margin-bottom:24px;}
+    .panel-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
+    .panel-title{font-size:1.6rem;font-weight:800;color:var(--ink);margin-bottom:6px;}
+    .panel-sub{font-size:.88rem;color:var(--muted);line-height:1.5;}
+
+    .stats-row{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
+    .stat-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 20px;display:flex;flex-direction:column;gap:3px;min-width:110px;flex:1;}
+    .stat-val{font-size:1.55rem;font-weight:800;color:var(--ink);line-height:1;}
+    .stat-lbl{font-size:.73rem;color:var(--muted);font-weight:600;}
+    .s-red{border-left:3px solid var(--red);}
+    .s-amber{border-left:3px solid #d4a017;}
+    .s-green{border-left:3px solid var(--accent);}
+
+    /* Overall readiness meter */
+    .readiness-hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:24px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
+    .rh-score{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;}
+    .rh-num{font-size:3rem;font-weight:900;color:var(--amber);line-height:1;}
+    .rh-label{font-size:.75rem;font-weight:700;color:var(--muted);}
+    .rh-bar-wrap{flex:1;min-width:200px;}
+    .rh-bar-label{font-size:.73rem;font-weight:700;color:var(--muted);margin-bottom:6px;}
+    .rh-bar{height:12px;background:var(--line);border-radius:99px;overflow:hidden;}
+    .rh-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--red) 0%,#d4a017 50%,var(--accent) 100%);}
+    .rh-detail{display:flex;gap:24px;flex-wrap:wrap;}
+    .rh-d-item{display:flex;flex-direction:column;gap:2px;}
+    .rh-d-val{font-size:1.1rem;font-weight:800;color:var(--ink);}
+    .rh-d-lbl{font-size:.7rem;color:var(--muted);font-weight:600;}
+
+    /* BU grid */
+    .bu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+    .bu-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;border-left:3px solid var(--line);}
+    .bu-card.bc-on{border-left-color:var(--accent);}
+    .bu-card.bc-mod{border-left-color:#d4a017;}
+    .bu-card.bc-risk{border-left-color:var(--red);}
+    .bu-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;}
+    .bu-name{font-size:.85rem;font-weight:800;color:var(--ink);}
+    .bu-badge{font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+    .bb-on{background:var(--lime);color:var(--forest);}
+    .bb-mod{background:var(--amber-soft);color:var(--amber);}
+    .bb-risk{background:var(--red-soft);color:var(--red);}
+    .bu-score{font-size:1.4rem;font-weight:900;margin-bottom:6px;}
+    .bu-bar{height:5px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:12px;}
+    .bu-fill{height:100%;border-radius:99px;}
+    .bf-g{background:var(--accent);}
+    .bf-a{background:#d4a017;}
+    .bf-r{background:var(--red);}
+    .bu-dims{display:flex;flex-direction:column;gap:5px;}
+    .bu-dim{display:flex;align-items:center;justify-content:space-between;font-size:.73rem;}
+    .bd-lbl{color:var(--muted);}
+    .bd-val{font-weight:700;color:var(--ink);}
+    .bd-val.dv-bad{color:var(--red);}
+    .bd-val.dv-warn{color:var(--amber);}
+    .bu-flag{display:flex;align-items:flex-start;gap:5px;margin-top:8px;padding:6px 8px;background:var(--amber-soft);border-radius:8px;}
+    .bu-flag span{font-size:.71rem;color:var(--amber);line-height:1.4;}
+
+    /* Timeline (program detail) */
+    .prog-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+    .pd-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;}
+    .pd-card-full{grid-column:1/-1;}
+    .pd-title{font-size:.92rem;font-weight:800;color:var(--ink);margin-bottom:4px;}
+    .pd-sub{font-size:.78rem;color:var(--muted);margin-bottom:16px;}
+    .wave-list{display:flex;flex-direction:column;gap:0;}
+    .wave-item{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);}
+    .wave-item:last-child{border-bottom:none;}
+    .wave-dot-col{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;padding-top:4px;}
+    .wave-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--line);}
+    .wd-done{background:var(--accent);border-color:var(--accent);}
+    .wd-active{background:#fff;border-color:var(--accent);box-shadow:0 0 0 3px rgba(61,154,130,.2);}
+    .wd-risk{background:#fff;border-color:var(--red);}
+    .wd-pend{background:#fff;border-color:var(--line);}
+    .wave-line{width:2px;flex:1;background:var(--line);min-height:20px;}
+    .wave-body{flex:1;}
+    .wb-wave{font-size:.7rem;font-weight:700;color:var(--muted);margin-bottom:2px;}
+    .wb-title{font-size:.86rem;font-weight:800;color:var(--ink);margin-bottom:4px;}
+    .wb-bus{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;}
+    .wb-bu{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--lime);color:var(--forest);}
+    .wb-bu.wbu-risk{background:var(--red-soft);color:var(--red);}
+    .wb-date{font-size:.73rem;color:var(--muted);}
+
+    /* Adoption signals */
+    .signals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+    .sig-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;}
+    .sig-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .sig-title{font-size:.82rem;font-weight:800;color:var(--ink);}
+    .sig-badge{font-size:.67rem;font-weight:700;padding:2px 7px;border-radius:99px;}
+    .sb-pos{background:var(--lime);color:var(--forest);}
+    .sb-neg{background:var(--red-soft);color:var(--red);}
+    .sb-warn{background:var(--amber-soft);color:var(--amber);}
+    .sig-rows{display:flex;flex-direction:column;gap:10px;}
+    .sig-row{display:flex;flex-direction:column;gap:4px;}
+    .sr-label{font-size:.73rem;color:var(--muted);display:flex;justify-content:space-between;}
+    .sr-bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;}
+    .sr-fill{height:100%;border-radius:99px;}
+    .sfg{background:var(--accent);}
+    .sfa{background:#d4a017;}
+    .sfr{background:var(--red);}
+    .ai-flag-list{display:flex;flex-direction:column;gap:10px;}
+    .ai-flag{display:flex;gap:12px;align-items:flex-start;padding:14px;background:var(--amber-soft);border:1px solid #f0c27f;border-radius:12px;}
+    .af-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+    .af-title{font-size:.83rem;font-weight:800;color:var(--ink);margin-bottom:3px;}
+    .af-body{font-size:.78rem;color:var(--muted);line-height:1.5;}
+    .ai-tag{font-size:.62rem;font-weight:800;padding:1px 6px;border-radius:4px;background:var(--lime);color:var(--forest);margin-left:6px;vertical-align:middle;}
+
+    /* Action plan */
+    .action-list{display:flex;flex-direction:column;gap:14px;}
+    .action-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;border-left:3px solid var(--red);}
+    .action-card.ac-warn{border-left-color:#d4a017;}
+    .ac-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+    .ac-bu{font-size:.92rem;font-weight:800;color:var(--ink);}
+    .ac-score{font-size:.8rem;color:var(--muted);}
+    .ac-items{display:flex;flex-direction:column;gap:8px;}
+    .ac-item{display:flex;gap:10px;align-items:flex-start;}
+    .ac-num{width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+    .ac-text{font-size:.84rem;color:var(--muted);line-height:1.5;}
+    .ac-text strong{color:var(--ink);}
+    .ac-deadline{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:.72rem;font-weight:700;color:var(--red);background:var(--red-soft);padding:3px 9px;border-radius:99px;}
+
+    footer{padding:20px 32px;border-top:1px solid var(--line);background:var(--surface);margin-top:auto;}
+    footer .fi{display:flex;justify-content:space-between;align-items:center;gap:20px;max-width:1180px;margin:0 auto;}
+    footer p{font-size:.75rem;color:var(--muted);}
+    footer a{font-size:.75rem;color:var(--accent);font-weight:700;text-decoration:none;}
+
+    @media(max-width:1100px){.bu-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:900px){
+      .proto-header,.suite-bar,.tab-bar,.proto-main{padding-left:16px;padding-right:16px;}
+      .bu-grid{grid-template-columns:1fr 1fr;}
+      .signals-grid{grid-template-columns:1fr;}
+      .prog-detail-grid{grid-template-columns:1fr;}
+    }
+    @media(max-width:600px){.bu-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+  <header class="proto-header">
+    <div class="ph-left">
+      <a class="ph-back" href="index.html">← Back</a>
+      <div class="ph-meta">
+        <p class="ph-eyebrow">Prototype · AI Portfolio Tooling</p>
+        <p class="ph-title">AI Change Management Readiness Tracker</p>
+      </div>
+    </div>
+    <div class="ph-badge"><span class="ai-pulse"></span>AI-Enabled · Mock Data</div>
+  </header>
+
+  <nav class="suite-bar">
+    <span class="sb-label">Portfolio Suite</span>
+    <div class="sb-links">
+      <a href="portfolio-dashboard.html" class="sb-link">Health Dashboard</a>
+      <a href="exec-report-generator.html" class="sb-link">Exec Reporter</a>
+      <a href="change-readiness-tracker.html" class="sb-link active">Change Tracker</a>
+      <a href="pmo-intake-scorer.html" class="sb-link">PMO Intake</a>
+    </div>
+  </nav>
+
+  <nav class="tab-bar" role="tablist">
+    <button class="tab-btn active" data-tab="overview" role="tab" aria-selected="true">BU Readiness Overview</button>
+    <button class="tab-btn" data-tab="program" role="tab" aria-selected="false">Program Detail</button>
+    <button class="tab-btn" data-tab="signals" role="tab" aria-selected="false">Adoption Signals</button>
+    <button class="tab-btn" data-tab="action" role="tab" aria-selected="false">AI Action Plan</button>
+  </nav>
+
+  <main class="proto-main">
+
+    <!-- ══ BU OVERVIEW ══ -->
+    <div class="tab-panel active" id="tab-overview" role="tabpanel">
+      <div class="panel-header">
+        <p class="panel-eyebrow">✦ AI-Tracked</p>
+        <h1 class="panel-title">BU Readiness Overview</h1>
+        <p class="panel-sub">Dragonboat AI adoption readiness across 8 Intuit business units · Q2–Q3 2026</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-val">8</span><p class="stat-lbl">BUs tracked</p>
+        </div>
+        <div class="stat-card s-green">
+          <span class="stat-val">3</span><p class="stat-lbl">On track</p>
+        </div>
+        <div class="stat-card s-amber">
+          <span class="stat-val">2</span><p class="stat-lbl">Moderate</p>
+        </div>
+        <div class="stat-card s-red">
+          <span class="stat-val">2</span><p class="stat-lbl">At risk</p>
+        </div>
+        <div class="stat-card s-red">
+          <span class="stat-val">1</span><p class="stat-lbl">High risk</p>
+        </div>
+      </div>
+
+      <div class="readiness-hero">
+        <div class="rh-score">
+          <span class="rh-num">71%</span>
+          <span class="rh-label">Overall Readiness</span>
+        </div>
+        <div class="rh-bar-wrap">
+          <p class="rh-bar-label">Portfolio readiness · target 85% by June 30</p>
+          <div class="rh-bar"><div class="rh-fill" style="width:71%"></div></div>
+        </div>
+        <div class="rh-detail">
+          <div class="rh-d-item"><span class="rh-d-val">68%</span><span class="rh-d-lbl">Avg. training</span></div>
+          <div class="rh-d-item"><span class="rh-d-val">6 / 8</span><span class="rh-d-lbl">Sponsors active</span></div>
+          <div class="rh-d-item"><span class="rh-d-val">5 / 8</span><span class="rh-d-lbl">Champions identified</span></div>
+          <div class="rh-d-item"><span class="rh-d-val">June 30</span><span class="rh-d-lbl">Q2 gate</span></div>
+        </div>
+      </div>
+
+      <div class="bu-grid">
+
+        <!-- Consumer Products -->
+        <div class="bu-card bc-on">
+          <div class="bu-top">
+            <span class="bu-name">Consumer Products</span>
+            <span class="bu-badge bb-on">On Track</span>
+          </div>
+          <div class="bu-score" style="color:var(--forest)">91%</div>
+          <div class="bu-bar"><div class="bu-fill bf-g" style="width:91%"></div></div>
+          <div class="bu-dims">
+            <div class="bu-dim"><span class="bd-lbl">Training</span><span class="bd-val">100%</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Sponsor</span><span class="bd-val">Active</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Champion</span><span class="bd-val">Yes</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Process adoption</span><span class="bd-val">88%</span></div>
+          </div>
+        </div>
+
+        <!-- TurboTax -->
+        <div class="bu-card bc-on">
+          <div class="bu-top">
+            <span class="bu-name">TurboTax</span>
+            <span class="bu-badge bb-on">On Track</span>
+          </div>
+          <div class="bu-score" style="color:var(--forest)">88%</div>
+          <div class="bu-bar"><div class="bu-fill bf-g" style="width:88%"></div></div>
+          <div class="bu-dims">
+            <div class="bu-dim"><span class="bd-lbl">Training</span><span class="bd-val">95%</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Sponsor</span><span class="bd-val">Active</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Champion</span><span class="bd-val">Yes</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Process adoption</span><span class="bd-val">82%</span></div>
+          </div>
+        </div>
+
+        <!-- Small Business -->
+        <div class="bu-card bc-on">
+          <div class="bu-top">
+            <span class="bu-name">Small Business</span>
+            <span class="bu-badge bb-on">On Track</span>
+          </div>
+          <div class="bu-score" style="color:var(--forest)">85%</div>
+          <div class="bu-bar"><div class="bu-fill bf-g" style="width:85%"></div></div>
+          <div class="bu-dims">
+            <div class="bu-dim"><span class="bd-lbl">Training</span><span class="bd-val">88%</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Sponsor</span><span class="bd-val">Engaged</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Champion</span><span class="bd-val">Yes</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Process adoption</span><span class="bd-val">79%</span></div>
+          </div>
+        </div>
+
+        <!-- QuickBooks -->
+        <div class="bu-card bc-mod">
+          <div class="bu-top">
+            <span class="bu-name">QuickBooks</span>
+            <span class="bu-badge bb-mod">Moderate</span>
+          </div>
+          <div class="bu-score" style="color:var(--amber)">79%</div>
+          <div class="bu-bar"><div class="bu-fill bf-a" style="width:79%"></div></div>
+          <div class="bu-dims">
+            <div class="bu-dim"><span class="bd-lbl">Training</span><span class="bd-val dv-warn">76%</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Sponsor</span><span class="bd-val dv-warn">Partial</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Champion</span><span class="bd-val dv-warn">No</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Process adoption</span><span class="bd-val">72%</span></div>
+          </div>
+        </div>
+
+        <!-- ProConnect -->
+        <div class="bu-card bc-mod">
+          <div class="bu-top">
+            <span class="bu-name">ProConnect</span>
+            <span class="bu-badge bb-mod">Moderate</span>
+          </div>
+          <div class="bu-score" style="color:var(--amber)">74%</div>
+          <div class="bu-bar"><div class="bu-fill bf-a" style="width:74%"></div></div>
+          <div class="bu-dims">
+            <div class="bu-dim"><span class="bd-lbl">Training</span><span class="bd-val dv-warn">70%</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Sponsor</span><span class="bd-val">Engaged</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Champion</span><span class="bd-val dv-warn">No</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Process adoption</span><span class="bd-val">68%</span></div>
+          </div>
+        </div>
+
+        <!-- Tax Platform -->
+        <div class="bu-card bc-risk">
+          <div class="bu-top">
+            <span class="bu-name">Tax Platform</span>
+            <span class="bu-badge bb-risk">At Risk</span>
+          </div>
+          <div class="bu-score" style="color:var(--red)">62%</div>
+          <div class="bu-bar"><div class="bu-fill bf-r" style="width:62%"></div></div>
+          <div class="bu-dims">
+            <div class="bu-dim"><span class="bd-lbl">Training</span><span class="bd-val dv-bad">45%</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Sponsor</span><span class="bd-val dv-bad">Disengaged</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Champion</span><span class="bd-val dv-bad">No</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Process adoption</span><span class="bd-val dv-warn">55%</span></div>
+          </div>
+          <div class="bu-flag"><span>⚠ Training rescheduled 3×</span></div>
+        </div>
+
+        <!-- Financial Services -->
+        <div class="bu-card bc-risk">
+          <div class="bu-top">
+            <span class="bu-name">Financial Services</span>
+            <span class="bu-badge bb-risk">At Risk</span>
+          </div>
+          <div class="bu-score" style="color:var(--red)">58%</div>
+          <div class="bu-bar"><div class="bu-fill bf-r" style="width:58%"></div></div>
+          <div class="bu-dims">
+            <div class="bu-dim"><span class="bd-lbl">Training</span><span class="bd-val dv-bad">40%</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Sponsor</span><span class="bd-val dv-bad">Unconfirmed</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Champion</span><span class="bd-val dv-bad">No</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Process adoption</span><span class="bd-val dv-bad">48%</span></div>
+          </div>
+          <div class="bu-flag"><span>⚠ BU lead disengaged from onboarding</span></div>
+        </div>
+
+        <!-- Credit Karma -->
+        <div class="bu-card bc-risk">
+          <div class="bu-top">
+            <span class="bu-name">Credit Karma</span>
+            <span class="bu-badge bb-risk">High Risk</span>
+          </div>
+          <div class="bu-score" style="color:var(--red)">45%</div>
+          <div class="bu-bar"><div class="bu-fill bf-r" style="width:45%"></div></div>
+          <div class="bu-dims">
+            <div class="bu-dim"><span class="bd-lbl">Training</span><span class="bd-val dv-bad">20%</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Sponsor</span><span class="bd-val dv-bad">Absent</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Champion</span><span class="bd-val dv-bad">No</span></div>
+            <div class="bu-dim"><span class="bd-lbl">Process adoption</span><span class="bd-val dv-bad">30%</span></div>
+          </div>
+          <div class="bu-flag"><span>⚠ No adoption plan · late start</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ PROGRAM DETAIL ══ -->
+    <div class="tab-panel" id="tab-program" role="tabpanel">
+      <div class="panel-header">
+        <p class="panel-eyebrow">Program View</p>
+        <h1 class="panel-title">Program Detail</h1>
+        <p class="panel-sub">Rollout timeline and per-BU progress for programs driving change adoption.</p>
+      </div>
+
+      <div class="prog-detail-grid">
+
+        <div class="pd-card pd-card-full">
+          <p class="pd-title">AI Portfolio Planning Rollout — Dragonboat Adoption Timeline</p>
+          <p class="pd-sub">Intuit · Owner: Alison Whittaker · Q2 2026 milestone: June 30 · 6 of 8 BUs onboarded</p>
+          <div class="wave-list">
+            <div class="wave-item">
+              <div class="wave-dot-col"><div class="wave-dot wd-done"></div><div class="wave-line"></div></div>
+              <div class="wave-body">
+                <p class="wb-wave">Wave 1 · May 2026</p>
+                <p class="wb-title">Pilot — Consumer Products &amp; TurboTax</p>
+                <div class="wb-bus"><span class="wb-bu">Consumer Products</span><span class="wb-bu">TurboTax</span></div>
+                <p class="wb-date">✓ Complete · 100% trained · Champions active</p>
+              </div>
+            </div>
+            <div class="wave-item">
+              <div class="wave-dot-col"><div class="wave-dot wd-done"></div><div class="wave-line"></div></div>
+              <div class="wave-body">
+                <p class="wb-wave">Wave 2 · June 1–14, 2026</p>
+                <p class="wb-title">Small Business, QuickBooks &amp; ProConnect</p>
+                <div class="wb-bus"><span class="wb-bu">Small Business</span><span class="wb-bu">QuickBooks</span><span class="wb-bu">ProConnect</span></div>
+                <p class="wb-date">✓ Onboarded · Training 76–88% · No champions in QB/ProConnect</p>
+              </div>
+            </div>
+            <div class="wave-item">
+              <div class="wave-dot-col"><div class="wave-dot wd-active"></div><div class="wave-line"></div></div>
+              <div class="wave-body">
+                <p class="wb-wave">Wave 3 · June 28, 2026 — Q2 Milestone</p>
+                <p class="wb-title">Tax Platform &amp; Financial Services</p>
+                <div class="wb-bus"><span class="wb-bu wbu-risk">Tax Platform</span><span class="wb-bu wbu-risk">Financial Services</span></div>
+                <p class="wb-date">In progress · Training sessions June 28 · At-risk BUs — see Action Plan</p>
+              </div>
+            </div>
+            <div class="wave-item">
+              <div class="wave-dot-col"><div class="wave-dot wd-risk"></div></div>
+              <div class="wave-body">
+                <p class="wb-wave">Wave 4 · Q3 2026 — Requires Intervention</p>
+                <p class="wb-title">Credit Karma</p>
+                <div class="wb-bus"><span class="wb-bu wbu-risk">Credit Karma</span></div>
+                <p class="wb-date">High risk · No adoption plan · Sponsor absent · Emergency action required</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pd-card">
+          <p class="pd-title">TPM Operating Model Redesign — Change Impact</p>
+          <p class="pd-sub">Intuit · Owner: Alison Whittaker · RACI approval pending</p>
+          <div class="wave-list">
+            <div class="wave-item">
+              <div class="wave-dot-col"><div class="wave-dot wd-done"></div><div class="wave-line"></div></div>
+              <div class="wave-body">
+                <p class="wb-wave">Phase 1 · April–May 2026</p>
+                <p class="wb-title">Current-state assessment</p>
+                <p class="wb-date">✓ Complete · 12 TPM process interviews conducted</p>
+              </div>
+            </div>
+            <div class="wave-item">
+              <div class="wave-dot-col"><div class="wave-dot wd-done"></div><div class="wave-line"></div></div>
+              <div class="wave-body">
+                <p class="wb-wave">Phase 2 · May–June 2026</p>
+                <p class="wb-title">New model design + RACI draft</p>
+                <p class="wb-date">✓ Complete · RACI submitted June 5</p>
+              </div>
+            </div>
+            <div class="wave-item">
+              <div class="wave-dot-col"><div class="wave-dot wd-risk"></div><div class="wave-line"></div></div>
+              <div class="wave-body">
+                <p class="wb-wave">Phase 3 · Blocked</p>
+                <p class="wb-title">RACI approval + exec alignment</p>
+                <p class="wb-date">⚠ Pending 3 weeks · No exec sponsor · Q3 kickoff blocked</p>
+              </div>
+            </div>
+            <div class="wave-item">
+              <div class="wave-dot-col"><div class="wave-dot wd-pend"></div></div>
+              <div class="wave-body">
+                <p class="wb-wave">Phase 4 · Q3 2026 target</p>
+                <p class="wb-title">Rollout to all TPM teams</p>
+                <p class="wb-date">Pending RACI approval</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pd-card">
+          <p class="pd-title">Dragonboat Adoption — BU Progress Summary</p>
+          <p class="pd-sub">Training and process adoption by business unit</p>
+          <table style="width:100%;border-collapse:collapse;font-size:.8rem;margin-top:4px;">
+            <thead>
+              <tr>
+                <th style="text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:0 8px 8px 0;border-bottom:1px solid var(--line);">BU</th>
+                <th style="text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);">Training</th>
+                <th style="text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line);">Process</th>
+                <th style="text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:0 0 8px;border-bottom:1px solid var(--line);">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:8px 8px 8px 0;font-weight:700;font-size:.77rem;border-bottom:1px solid var(--line)">Consumer Products</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--forest);font-weight:700">100%</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--forest);font-weight:700">88%</td><td style="padding:8px 0 8px 8px;border-bottom:1px solid var(--line)"><span style="font-size:.67rem;font-weight:700;padding:2px 6px;border-radius:99px;background:var(--lime);color:var(--forest)">✓ Live</span></td></tr>
+              <tr><td style="padding:8px 8px 8px 0;font-weight:700;font-size:.77rem;border-bottom:1px solid var(--line)">TurboTax</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--forest);font-weight:700">95%</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--forest);font-weight:700">82%</td><td style="padding:8px 0 8px 8px;border-bottom:1px solid var(--line)"><span style="font-size:.67rem;font-weight:700;padding:2px 6px;border-radius:99px;background:var(--lime);color:var(--forest)">✓ Live</span></td></tr>
+              <tr><td style="padding:8px 8px 8px 0;font-weight:700;font-size:.77rem;border-bottom:1px solid var(--line)">Small Business</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--forest);font-weight:700">88%</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--amber);font-weight:700">79%</td><td style="padding:8px 0 8px 8px;border-bottom:1px solid var(--line)"><span style="font-size:.67rem;font-weight:700;padding:2px 6px;border-radius:99px;background:var(--lime);color:var(--forest)">✓ Live</span></td></tr>
+              <tr><td style="padding:8px 8px 8px 0;font-weight:700;font-size:.77rem;border-bottom:1px solid var(--line)">QuickBooks</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--amber);font-weight:700">76%</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--amber);font-weight:700">72%</td><td style="padding:8px 0 8px 8px;border-bottom:1px solid var(--line)"><span style="font-size:.67rem;font-weight:700;padding:2px 6px;border-radius:99px;background:var(--lime);color:var(--forest)">✓ Live</span></td></tr>
+              <tr><td style="padding:8px 8px 8px 0;font-weight:700;font-size:.77rem;border-bottom:1px solid var(--line)">ProConnect</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--amber);font-weight:700">70%</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--amber);font-weight:700">68%</td><td style="padding:8px 0 8px 8px;border-bottom:1px solid var(--line)"><span style="font-size:.67rem;font-weight:700;padding:2px 6px;border-radius:99px;background:var(--lime);color:var(--forest)">✓ Live</span></td></tr>
+              <tr><td style="padding:8px 8px 8px 0;font-weight:700;font-size:.77rem;border-bottom:1px solid var(--line)">Tax Platform</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--red);font-weight:700">45%</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--red);font-weight:700">55%</td><td style="padding:8px 0 8px 8px;border-bottom:1px solid var(--line)"><span style="font-size:.67rem;font-weight:700;padding:2px 6px;border-radius:99px;background:var(--red-soft);color:var(--red)">At Risk</span></td></tr>
+              <tr><td style="padding:8px 8px 8px 0;font-weight:700;font-size:.77rem;border-bottom:1px solid var(--line)">Financial Services</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--red);font-weight:700">40%</td><td style="padding:8px;border-bottom:1px solid var(--line);color:var(--red);font-weight:700">48%</td><td style="padding:8px 0 8px 8px;border-bottom:1px solid var(--line)"><span style="font-size:.67rem;font-weight:700;padding:2px 6px;border-radius:99px;background:var(--red-soft);color:var(--red)">At Risk</span></td></tr>
+              <tr><td style="padding:8px 8px 8px 0;font-weight:700;font-size:.77rem">Credit Karma</td><td style="padding:8px;color:var(--red);font-weight:700">20%</td><td style="padding:8px;color:var(--red);font-weight:700">30%</td><td style="padding:8px 0 8px 8px"><span style="font-size:.67rem;font-weight:700;padding:2px 6px;border-radius:99px;background:var(--red-soft);color:var(--red)">High Risk</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ ADOPTION SIGNALS ══ -->
+    <div class="tab-panel" id="tab-signals" role="tabpanel">
+      <div class="panel-header">
+        <p class="panel-eyebrow">✦ AI-Analyzed</p>
+        <h1 class="panel-title">Adoption Signals</h1>
+        <p class="panel-sub">Leading indicators, engagement metrics, and AI-flagged adoption risks across all 8 BUs.</p>
+      </div>
+
+      <div class="signals-grid">
+        <div class="sig-card">
+          <div class="sig-header">
+            <span class="sig-title">Platform Engagement</span>
+            <span class="sig-badge sb-warn">Mixed</span>
+          </div>
+          <div class="sig-rows">
+            <div class="sig-row">
+              <div class="sr-label"><span>Consumer Products</span><span style="font-weight:700;color:var(--forest)">92%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfg" style="width:92%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>TurboTax</span><span style="font-weight:700;color:var(--forest)">87%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfg" style="width:87%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>Small Business</span><span style="font-weight:700;color:var(--forest)">81%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfg" style="width:81%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>QuickBooks</span><span style="font-weight:700;color:var(--amber)">68%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfa" style="width:68%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>ProConnect</span><span style="font-weight:700;color:var(--amber)">61%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfa" style="width:61%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>Tax Platform</span><span style="font-weight:700;color:var(--red)">38%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfr" style="width:38%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>Financial Services</span><span style="font-weight:700;color:var(--red)">31%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfr" style="width:31%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>Credit Karma</span><span style="font-weight:700;color:var(--red)">12%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfr" style="width:12%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sig-card">
+          <div class="sig-header">
+            <span class="sig-title">Training Completion</span>
+            <span class="sig-badge sb-warn">68% avg</span>
+          </div>
+          <div class="sig-rows">
+            <div class="sig-row">
+              <div class="sr-label"><span>Consumer Products</span><span style="font-weight:700;color:var(--forest)">100%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfg" style="width:100%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>TurboTax</span><span style="font-weight:700;color:var(--forest)">95%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfg" style="width:95%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>Small Business</span><span style="font-weight:700;color:var(--forest)">88%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfg" style="width:88%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>QuickBooks</span><span style="font-weight:700;color:var(--amber)">76%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfa" style="width:76%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>ProConnect</span><span style="font-weight:700;color:var(--amber)">70%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfa" style="width:70%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>Tax Platform</span><span style="font-weight:700;color:var(--red)">45%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfr" style="width:45%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>Financial Services</span><span style="font-weight:700;color:var(--red)">40%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfr" style="width:40%"></div></div>
+            </div>
+            <div class="sig-row">
+              <div class="sr-label"><span>Credit Karma</span><span style="font-weight:700;color:var(--red)">20%</span></div>
+              <div class="sr-bar"><div class="sr-fill sfr" style="width:20%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sig-card">
+          <div class="sig-header">
+            <span class="sig-title">✦ AI-Flagged Risks</span>
+            <span class="sig-badge sb-neg">3 critical</span>
+          </div>
+          <div class="ai-flag-list">
+            <div class="ai-flag">
+              <span class="af-icon">⚠</span>
+              <div>
+                <p class="af-title">Credit Karma — No adoption plan <span class="ai-tag">✦ AI</span></p>
+                <p class="af-body">Zero training completion, absent sponsor, and no documented adoption plan with 6 weeks to Q3 cutover. Highest risk BU in the portfolio. Exclusion from Q3 AI features likely without emergency intervention.</p>
+              </div>
+            </div>
+            <div class="ai-flag">
+              <span class="af-icon">⚠</span>
+              <div>
+                <p class="af-title">Financial Services — BU lead disengaged <span class="ai-tag">✦ AI</span></p>
+                <p class="af-body">Declined two onboarding sessions without rescheduling. Platform engagement at 31%. AI signal: sponsor relationship breakdown — exec escalation required before June 28 session.</p>
+              </div>
+            </div>
+            <div class="ai-flag">
+              <span class="af-icon">⚠</span>
+              <div>
+                <p class="af-title">Tax Platform — Training resistance pattern <span class="ai-tag">✦ AI</span></p>
+                <p class="af-body">Sessions rescheduled 3× without completion. AI identifies this as a leading indicator of adoption failure — not a scheduling issue. Recommend converting remaining training to async format with a hard completion deadline.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ACTION PLAN ══ -->
+    <div class="tab-panel" id="tab-action" role="tabpanel">
+      <div class="panel-header">
+        <p class="panel-eyebrow">✦ AI-Recommended</p>
+        <h1 class="panel-title">AI Action Plan</h1>
+        <p class="panel-sub">AI-generated change management actions for at-risk BUs. Prioritized by impact and urgency.</p>
+      </div>
+
+      <div class="action-list">
+
+        <div class="action-card">
+          <div class="ac-top">
+            <div>
+              <p class="ac-bu">Credit Karma <span style="font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--red-soft);color:var(--red);margin-left:6px;">High Risk · 45%</span></p>
+              <p class="ac-score">Readiness gap: 40 points below target · No adoption plan · Sponsor absent</p>
+            </div>
+            <span class="ac-deadline">⚡ Act by June 28</span>
+          </div>
+          <div class="ac-items">
+            <div class="ac-item"><span class="ac-num">1</span><p class="ac-text"><strong>Emergency sponsor meeting.</strong> Escalate to VP Product to assign an active sponsor before June 28. Without sponsorship, this BU cannot proceed to Q3 AI-enabled planning.</p></div>
+            <div class="ac-item"><span class="ac-num">2</span><p class="ac-text"><strong>Assign a dedicated change agent.</strong> Embed a TPM from the AI Planning Rollout team as a temporary change agent for Credit Karma through Q3 rollout.</p></div>
+            <div class="ac-item"><span class="ac-num">3</span><p class="ac-text"><strong>Create adoption plan.</strong> Develop a Credit Karma-specific adoption plan (training schedule, RACI, milestones) by July 5. Use Consumer Products as the template — highest readiness BU in the portfolio.</p></div>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <div class="ac-top">
+            <div>
+              <p class="ac-bu">Financial Services <span style="font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--red-soft);color:var(--red);margin-left:6px;">At Risk · 58%</span></p>
+              <p class="ac-score">Sponsor unconfirmed · BU lead disengaged · Training at 40%</p>
+            </div>
+            <span class="ac-deadline">⚡ Act by June 27</span>
+          </div>
+          <div class="ac-items">
+            <div class="ac-item"><span class="ac-num">1</span><p class="ac-text"><strong>Re-engage BU lead with exec escalation.</strong> Request VP-level outreach to Financial Services BU lead before the June 28 onboarding session. Do not proceed without confirmed attendance.</p></div>
+            <div class="ac-item"><span class="ac-num">2</span><p class="ac-text"><strong>Confirm sponsor identity.</strong> Sponsor listed as "unconfirmed" — requires resolution before June 28. Without a named sponsor, RACI cannot be signed and TPM workflows cannot be embedded.</p></div>
+            <div class="ac-item"><span class="ac-num">3</span><p class="ac-text"><strong>Set a training hard deadline.</strong> June 28 is the final scheduled session. Communicate that Q3 AI features will not be enabled for Financial Services without 80%+ training completion by July 5.</p></div>
+          </div>
+        </div>
+
+        <div class="action-card ac-warn">
+          <div class="ac-top">
+            <div>
+              <p class="ac-bu">Tax Platform <span style="font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--amber-soft);color:var(--amber);margin-left:6px;">At Risk · 62%</span></p>
+              <p class="ac-score">Training rescheduled 3× · Sponsor disengaged · No champion</p>
+            </div>
+            <span class="ac-deadline" style="color:var(--amber);background:var(--amber-soft);">Act by July 1</span>
+          </div>
+          <div class="ac-items">
+            <div class="ac-item"><span class="ac-num" style="background:var(--amber)">1</span><p class="ac-text"><strong>Convert training to async format.</strong> Live sessions have been rescheduled 3× — a pattern of resistance, not scheduling conflict. Convert to async modules with a hard completion deadline of July 1.</p></div>
+            <div class="ac-item"><span class="ac-num" style="background:var(--amber)">2</span><p class="ac-text"><strong>Identify an internal champion.</strong> No champion exists in Tax Platform. Nominate a senior IC or tech lead as a Dragonboat power user. Champion activation is the single highest-leverage action available for this BU.</p></div>
+            <div class="ac-item"><span class="ac-num" style="background:var(--amber)">3</span><p class="ac-text"><strong>Re-engage sponsor.</strong> Schedule a 20-minute sponsor briefing to align on Q3 AI planning benefits and confirm RACI ownership. Share the Consumer Products and TurboTax adoption ROI data as motivation.</p></div>
+          </div>
+        </div>
+
+        <div class="action-card ac-warn">
+          <div class="ac-top">
+            <div>
+              <p class="ac-bu">QuickBooks &amp; ProConnect <span style="font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--amber-soft);color:var(--amber);margin-left:6px;">Moderate · 79% / 74%</span></p>
+              <p class="ac-score">Onboarded · No champions identified · Training momentum at risk</p>
+            </div>
+            <span class="ac-deadline" style="color:var(--amber);background:var(--amber-soft);">Monitor through July</span>
+          </div>
+          <div class="ac-items">
+            <div class="ac-item"><span class="ac-num" style="background:var(--amber)">1</span><p class="ac-text"><strong>Champion identification.</strong> Both BUs onboarded without an identified champion. Recommend recruiting a senior TPM or PM as champion within the next 2 weeks. Risk: without a champion, adoption plateaus below 80%.</p></div>
+            <div class="ac-item"><span class="ac-num" style="background:var(--amber)">2</span><p class="ac-text"><strong>Complete remaining training by July 15.</strong> QuickBooks at 76%, ProConnect at 70%. A structured push to 85%+ completion will move both BUs to On Track before Q3.</p></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="fi">
+      <p>AI Change Management Readiness Tracker · Alison Whittaker · Working Prototype</p>
+      <a href="index.html">← Back to portfolio</a>
+    </div>
+  </footer>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+    tabs.forEach(btn => btn.addEventListener('click', () => {
+      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+      panels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+      const panel = document.getElementById('tab-' + btn.dataset.tab);
+      if (panel) panel.classList.add('active');
+    }));
+  </script>
+</body>
+</html>
