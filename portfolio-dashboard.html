@@ -1,0 +1,1261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Portfolio Health & Launch Readiness — Prototype | Alison Whittaker</title>
+  <style>
+    :root {
+      --ink: #3d2924;
+      --muted: #76635c;
+      --paper: #f8f5f1;
+      --surface: #fffdf9;
+      --line: #ded2ca;
+      --accent: #3d9a82;
+      --accent-soft: #ead4c9;
+      --forest: #2f7566;
+      --lime: #cce8dd;
+      --cocoa: #4b312b;
+      --shadow: 0 18px 50px rgba(76,49,43,.09);
+      --radius: 20px;
+      --red: #b83020;
+      --red-soft: #fdecea;
+      --amber: #9a6e00;
+      --amber-soft: #fef6e4;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    p { text-wrap: pretty; }
+
+    /* ── HEADER ────────────────────────────── */
+    .proto-header {
+      position: sticky; top: 0; z-index: 30;
+      display: flex; align-items: center; justify-content: space-between;
+      min-height: 70px; padding: 12px 32px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper) 92%, transparent);
+      backdrop-filter: blur(18px);
+    }
+    .ph-left { display: flex; align-items: center; gap: 18px; }
+    .ph-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px;
+      color: var(--muted); font-size: .78rem; font-weight: 650;
+      transition: color .2s, border-color .2s;
+    }
+    .ph-back:hover { color: var(--ink); border-color: var(--ink); }
+    .ph-meta { display: flex; flex-direction: column; gap: 1px; }
+    .ph-eyebrow { margin: 0; color: var(--accent); font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .ph-title { margin: 0; font-size: .9rem; font-weight: 750; }
+    .ph-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 14px; border-radius: 999px;
+      background: var(--lime); color: var(--forest);
+      font-size: .7rem; font-weight: 800; letter-spacing: .04em;
+    }
+    .ai-pulse {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ── TAB BAR ───────────────────────────── */
+    .tab-bar {
+      position: sticky; top: 70px; z-index: 20;
+      display: flex; overflow-x: auto;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+      scrollbar-width: none;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex-shrink: 0; height: 52px; padding: 0 20px;
+      border: none; border-bottom: 3px solid transparent;
+      background: transparent; color: var(--muted);
+      cursor: pointer; font-family: inherit;
+      font-size: .83rem; font-weight: 650;
+      transition: color .18s, border-color .18s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--ink); }
+    .tab-btn.active { border-bottom-color: var(--accent); color: var(--forest); font-weight: 750; }
+
+    /* ── MAIN LAYOUT ───────────────────────── */
+    .proto-main {
+      width: min(calc(100% - 48px), 1180px);
+      margin: 0 auto; padding-block: 48px 80px;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── DISCLAIMER ────────────────────────── */
+    .disclaimer {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 18px; margin-bottom: 36px;
+      border: 1px solid var(--line); border-radius: 12px;
+      background: var(--surface); font-size: .78rem; color: var(--muted);
+    }
+    .disclaimer strong { color: var(--ink); }
+
+    /* ── PANEL HEADERS ─────────────────────── */
+    .panel-header { margin-bottom: 36px; }
+    .panel-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin: 0 0 10px; color: var(--accent);
+      font-size: .68rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+    }
+    .panel-title { margin: 0 0 8px; font-size: clamp(1.9rem,3.5vw,2.9rem); font-weight: 760; letter-spacing: -.04em; line-height: 1.05; }
+    .panel-sub { margin: 0; color: var(--muted); font-size: .96rem; max-width: 760px; }
+
+    /* ── STATS ROW ─────────────────────────── */
+    .stats-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 14px; margin-bottom: 32px; }
+    .stat-card {
+      padding: 20px 18px; border: 1px solid var(--line);
+      border-radius: 16px; background: var(--surface);
+    }
+    .stat-val {
+      display: block; font-size: 2.1rem; font-weight: 760;
+      letter-spacing: -.04em; line-height: 1; color: var(--accent);
+    }
+    .stat-card.s-green .stat-val { color: var(--forest); }
+    .stat-card.s-red .stat-val { color: var(--red); }
+    .stat-card.s-amber .stat-val { color: var(--amber); }
+    .stat-lbl { margin: 6px 0 0; color: var(--muted); font-size: .74rem; line-height: 1.35; }
+
+    /* ── PROGRAM CARDS ─────────────────────── */
+    .program-grid { display: grid; gap: 16px; }
+    .program-card {
+      display: grid; grid-template-columns: 1fr 160px;
+      gap: 18px 28px; padding: 28px 30px;
+      border: 1px solid var(--line); border-left: 4px solid var(--line);
+      border-radius: var(--radius); background: var(--surface);
+    }
+    .program-card.c-on    { border-left-color: var(--accent); }
+    .program-card.c-risk  { border-left-color: var(--red); }
+    .program-card.c-dec   { border-left-color: var(--amber); }
+    .program-card.c-done  { border-left-color: var(--forest); }
+
+    .pc-org { margin: 0 0 4px; font-size: .67rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .pc-name { margin: 0 0 8px; font-size: 1.18rem; font-weight: 750; letter-spacing: -.025em; }
+    .pc-desc { margin: 0 0 16px; color: var(--muted); font-size: .87rem; }
+    .pc-meta { display: flex; flex-wrap: wrap; gap: 18px; }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-lbl { font-size: .63rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .meta-val { font-size: .83rem; font-weight: 650; }
+
+    .pc-side { display: flex; flex-direction: column; align-items: flex-end; gap: 14px; }
+    .status-badge {
+      padding: 5px 13px; border-radius: 999px;
+      font-size: .7rem; font-weight: 800; letter-spacing: .04em; white-space: nowrap;
+    }
+    .sb-on   { background: var(--lime); color: var(--forest); }
+    .sb-risk { background: var(--red-soft); color: var(--red); }
+    .sb-dec  { background: var(--amber-soft); color: var(--amber); }
+    .sb-done { background: var(--lime); color: var(--forest); }
+
+    .health-bar { width: 100%; }
+    .hb-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: .67rem; color: var(--muted); }
+    .hb-track { height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+    .hb-fill { height: 100%; border-radius: 999px; background: var(--accent); }
+    .hb-fill.hf-red    { background: var(--red); }
+    .hb-fill.hf-amber  { background: #c9a000; }
+
+    .pc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; grid-column: 1; }
+    .tag {
+      padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px;
+      font-size: .69rem; font-weight: 700; color: var(--forest);
+    }
+    .tag.t-warn { border-color: #f0c27f; color: var(--amber); background: var(--amber-soft); }
+    .tag.t-ok   { border-color: #a9d7ca; color: var(--forest); background: var(--lime); }
+
+    /* ── AI SUMMARY ────────────────────────── */
+    .ai-card {
+      padding: 38px 42px; border: 1px solid var(--line);
+      border-radius: var(--radius); background: var(--surface); margin-bottom: 20px;
+    }
+    .ai-card-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 20px; margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--line);
+    }
+    .ai-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 11px; border-radius: 999px;
+      background: var(--lime); color: var(--forest);
+      font-size: .67rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    }
+    .ai-card h2 { margin: 12px 0 4px; font-size: 1.65rem; letter-spacing: -.035em; }
+    .ai-date { margin: 0; color: var(--muted); font-size: .82rem; }
+    .status-pill {
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 18px; border-radius: 999px;
+      font-weight: 750; font-size: .84rem;
+    }
+    .sp-amber { background: var(--amber-soft); color: var(--amber); }
+
+    .sum-sec { margin-bottom: 28px; }
+    .sum-sec h3 {
+      margin: 0 0 12px; font-size: .72rem; font-weight: 800;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--forest);
+    }
+    .sum-sec p { margin: 0 0 10px; color: var(--muted); line-height: 1.72; font-size: .94rem; }
+    .sum-sec p:last-child { margin-bottom: 0; }
+    .sum-sec p strong { color: var(--ink); }
+
+    .dec-list { display: grid; gap: 10px; }
+    .dec-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px;
+      background: var(--paper); font-size: .87rem;
+    }
+    .dec-num {
+      flex-shrink: 0; width: 26px; height: 26px; display: grid; place-items: center;
+      border-radius: 50%; background: var(--accent-soft); color: var(--cocoa);
+      font-size: .74rem; font-weight: 800;
+    }
+    .dec-item p { margin: 0; line-height: 1.6; color: var(--muted); }
+    .dec-item p strong { color: var(--ink); }
+
+    /* ── RISK ANALYZER ─────────────────────── */
+    .hidden-banner {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 18px 22px; margin-bottom: 22px;
+      border: 1px solid #e8c87a; border-radius: 14px;
+      background: var(--amber-soft);
+    }
+    .hb-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; margin-top: 1px; }
+    .hb-body strong { display: block; margin-bottom: 4px; font-size: .9rem; color: #5a3e00; }
+    .hb-body p { margin: 0; font-size: .84rem; color: #7a5800; }
+
+    .risk-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 24px; }
+    table.risk-tbl { width: 100%; border-collapse: collapse; font-size: .86rem; }
+    .risk-tbl th {
+      padding: 12px 16px; text-align: left; white-space: nowrap;
+      font-size: .67rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); border-bottom: 2px solid var(--line); background: var(--paper);
+    }
+    .risk-tbl td { padding: 16px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .risk-tbl tr:last-child td { border-bottom: 0; }
+    .risk-tbl tr:hover td { background: color-mix(in srgb, var(--paper) 50%, var(--surface)); }
+    .risk-tbl td:first-child { font-weight: 650; }
+
+    .sev {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 999px;
+      font-size: .7rem; font-weight: 800; white-space: nowrap;
+    }
+    .sev-h { background: var(--red-soft); color: var(--red); }
+    .sev-m { background: var(--amber-soft); color: var(--amber); }
+    .sev-l { background: var(--lime); color: var(--forest); }
+
+    .ai-tag {
+      display: inline-flex; padding: 2px 7px; border-radius: 4px;
+      background: var(--lime); color: var(--forest);
+      font-size: .63rem; font-weight: 800; letter-spacing: .04em; vertical-align: middle; margin-left: 4px;
+    }
+
+    .dep-card {
+      padding: 26px 30px; border: 1px solid var(--line);
+      border-radius: var(--radius); background: var(--surface);
+    }
+    .dep-card h3 { margin: 0 0 16px; font-size: 1.05rem; letter-spacing: -.02em; }
+    .dep-card p { margin: 0 0 12px; color: var(--muted); font-size: .84rem; }
+    .dep-list { display: grid; gap: 10px; }
+    .dep-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 13px 16px; border: 1px solid var(--line); border-radius: 10px;
+      background: var(--paper); font-size: .85rem; line-height: 1.55;
+    }
+    .dep-item span:first-child { font-size: 1rem; flex-shrink: 0; }
+
+    /* ── SCORECARD ─────────────────────────── */
+    .sc-wrap { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 22px; }
+    table.sc-tbl { width: 100%; border-collapse: collapse; font-size: .87rem; }
+    .sc-tbl thead tr { background: var(--paper); border-bottom: 2px solid var(--line); }
+    .sc-tbl th {
+      padding: 14px 18px; text-align: left;
+      font-size: .67rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    }
+    .sc-tbl th.center { text-align: center; }
+    .sc-tbl td { padding: 18px 18px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .sc-tbl td.center { text-align: center; }
+    .sc-tbl tr:last-child td { border-bottom: 0; }
+    .sc-tbl tr:hover td { background: var(--paper); }
+    .sc-name { font-weight: 650; font-size: .91rem; }
+    .sc-org  { color: var(--muted); font-size: .74rem; margin-top: 2px; }
+
+    .chip {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 56px; padding: 5px 10px; border-radius: 8px;
+      font-size: .84rem; font-weight: 750;
+    }
+    .chip-g { background: var(--lime); color: var(--forest); }
+    .chip-a { background: var(--amber-soft); color: var(--amber); }
+    .chip-r { background: var(--red-soft); color: var(--red); }
+    .chip-n { background: var(--line); color: var(--muted); }
+
+    .rec-cell { font-size: .83rem; color: var(--muted); line-height: 1.55; max-width: 340px; }
+
+    .sc-legend { display: flex; gap: 22px; font-size: .78rem; color: var(--muted); }
+    .sl-item { display: flex; align-items: center; gap: 7px; }
+    .sl-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+    /* ── MEETING FOLLOW-UP ─────────────────── */
+    .meeting-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+    .meet-card {
+      padding: 30px 32px; border: 1px solid var(--line);
+      border-radius: var(--radius); background: var(--surface);
+    }
+    .meet-card h3 { margin: 0 0 6px; font-size: 1.05rem; letter-spacing: -.02em; }
+    .meet-card > p { margin: 0 0 18px; color: var(--muted); font-size: .84rem; }
+
+    textarea {
+      width: 100%; min-height: 270px; padding: 14px 16px;
+      border: 1px solid var(--line); border-radius: 12px;
+      background: var(--paper); color: var(--ink);
+      font-family: inherit; font-size: .85rem; line-height: 1.65; resize: vertical;
+    }
+    textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+
+    .analyze-btn {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+      min-height: 44px; padding: 0 22px;
+      border: none; border-radius: 999px;
+      background: var(--cocoa); color: var(--paper);
+      cursor: pointer; font-family: inherit; font-size: .88rem; font-weight: 750;
+      transition: opacity .2s;
+    }
+    .analyze-btn:hover { opacity: .88; }
+    .analyze-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .load-bar { display: none; height: 3px; border-radius: 999px; background: var(--line); overflow: hidden; margin-bottom: 20px; }
+    .load-bar.running { display: block; }
+    .lb-fill { height: 100%; border-radius: 999px; background: var(--accent); animation: load-anim 1.9s ease-in-out; }
+    @keyframes load-anim { 0%{width:0%} 100%{width:100%} }
+
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 220px; color: var(--muted); text-align: center; font-size: .88rem;
+    }
+    .empty-icon { font-size: 2rem; margin-bottom: 12px; opacity: .35; }
+
+    .out-section { display: none; }
+    .out-section.vis { display: block; }
+
+    .out-group { margin-bottom: 22px; }
+    .out-group h4 {
+      margin: 0 0 10px; font-size: .69rem; font-weight: 800;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--forest);
+    }
+    .out-item {
+      display: flex; align-items: flex-start; gap: 11px;
+      padding: 13px 15px; border: 1px solid var(--line); border-radius: 10px;
+      margin-bottom: 8px; background: var(--paper); font-size: .85rem;
+    }
+    .out-item:last-child { margin-bottom: 0; }
+    .out-item-icon { flex-shrink: 0; font-size: .9rem; }
+    .out-item-body strong { display: block; margin-bottom: 3px; font-size: .84rem; }
+    .out-item-body span { color: var(--muted); font-size: .77rem; }
+    .out-item.flag { border-color: #e8c87a; background: var(--amber-soft); }
+
+    /* ── RESPONSIVE ────────────────────────── */
+    @media (max-width: 860px) {
+      .stats-row { grid-template-columns: repeat(3,1fr); }
+      .meeting-grid { grid-template-columns: 1fr; }
+      .program-card { grid-template-columns: 1fr; }
+      .pc-side { align-items: flex-start; }
+      .proto-header { padding: 12px 18px; }
+      .tab-bar { padding: 0 18px; }
+      .proto-main { padding-block: 32px 60px; }
+      .ai-card { padding: 26px 24px; }
+      .ai-card-head { flex-direction: column; gap: 14px; }
+    }
+    @media (max-width: 560px) {
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .ph-back span { display: none; }
+    }
+
+    /* ── CARD GUIDE ──────────────────────────────────────── */
+    .guide-card {
+      border: 1px solid var(--line); border-radius: 16px;
+      background: var(--surface); margin-bottom: 36px; overflow: hidden;
+    }
+    .guide-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; padding: 16px 20px;
+    }
+    .guide-intro { display: flex; align-items: flex-start; gap: 10px; font-size: .79rem; color: var(--muted); line-height: 1.55; }
+    .guide-intro strong { color: var(--ink); }
+    .guide-toggle {
+      flex-shrink: 0; padding: 5px 14px;
+      border: 1px solid var(--line); border-radius: 999px;
+      background: var(--paper); color: var(--accent);
+      cursor: pointer; font-family: inherit; font-size: .74rem; font-weight: 750;
+      white-space: nowrap; transition: background .15s, border-color .15s;
+    }
+    .guide-toggle:hover { background: var(--lime); border-color: #a9d7ca; }
+    .guide-body {
+      display: none; padding: 0 20px 22px;
+      border-top: 1px solid var(--line);
+    }
+    .guide-body.open { display: block; }
+    .guide-sec { margin-top: 18px; }
+    .guide-sec-title {
+      font-size: .64rem; font-weight: 800; letter-spacing: .11em;
+      text-transform: uppercase; color: var(--forest); margin: 0 0 10px;
+    }
+    .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
+    .guide-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px;
+      background: var(--paper);
+    }
+    .gi-icon {
+      flex-shrink: 0; width: 22px; height: 22px; border-radius: 4px;
+      display: grid; place-items: center;
+      font-size: .72rem; font-weight: 800; line-height: 1;
+    }
+    .gi-green { background: var(--lime); color: var(--forest); }
+    .gi-red   { background: var(--red-soft); color: var(--red); }
+    .gi-amber { background: var(--amber-soft); color: var(--amber); }
+    .gi-done  { background: #cce8dd; color: #1f5c4a; }
+    .gi-soft  { background: var(--accent-soft); color: var(--cocoa); }
+    .guide-item strong { display: block; font-size: .8rem; font-weight: 700; margin-bottom: 2px; color: var(--ink); }
+    .guide-item span   { color: var(--muted); font-size: .75rem; line-height: 1.45; }
+    .guide-tags-col { display: grid; gap: 12px; margin-top: 6px; }
+    .guide-tag-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .gdemo {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 11px; border-radius: 999px; font-size: .74rem; font-weight: 700;
+      white-space: nowrap;
+    }
+    .gdemo-n { border: 1px solid var(--line); color: var(--forest); background: var(--surface); }
+    .gdemo-w { border: 1px solid #f0c27f; color: var(--amber); background: var(--amber-soft); }
+    .gdemo-g { border: 1px solid #a9d7ca; color: var(--forest); background: var(--lime); }
+    .guide-tag-desc { color: var(--muted); font-size: .76rem; line-height: 1.45; max-width: 560px; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="proto-header">
+    <div class="ph-left">
+      <a class="ph-back" href="index.html"><span>← Back</span></a>
+      <div class="ph-meta">
+        <p class="ph-eyebrow">Prototype · AI Portfolio Tooling</p>
+        <p class="ph-title">AI Portfolio Health &amp; Launch Readiness Dashboard</p>
+      </div>
+    </div>
+    <div class="ph-badge"><span class="ai-pulse"></span>AI-Enabled · Mock Data</div>
+  </header>
+
+  <!-- TAB BAR -->
+  <nav class="tab-bar" role="tablist" aria-label="Dashboard sections">
+    <button class="tab-btn active" role="tab" data-tab="dashboard" aria-selected="true">Portfolio Dashboard</button>
+    <button class="tab-btn" role="tab" data-tab="summary" aria-selected="false">AI Executive Summary</button>
+    <button class="tab-btn" role="tab" data-tab="risks" aria-selected="false">Risk &amp; Dependency Analyzer</button>
+    <button class="tab-btn" role="tab" data-tab="scorecard" aria-selected="false">Readiness Scorecard</button>
+    <button class="tab-btn" role="tab" data-tab="meeting" aria-selected="false">Meeting Follow-Up</button>
+  </nav>
+
+  <main class="proto-main">
+
+    <div class="guide-card">
+      <div class="guide-top">
+        <div class="guide-intro">
+          <span aria-hidden="true">ℹ</span>
+          <span><strong>Working prototype.</strong> Mock data reflects patterns from Oracle Fusion Applications and Intuit AI Tooling &amp; Adoption programs. Each initiative card shows program status, health score, ownership, milestone gates, and AI-flagged risks — the same view a PMO leader would distribute to executive stakeholders.</span>
+        </div>
+        <button class="guide-toggle" onclick="toggleGuide(this)" aria-expanded="false" aria-controls="guide-body">How to read each card ↓</button>
+      </div>
+
+      <div class="guide-body" id="guide-body">
+
+        <div class="guide-sec">
+          <p class="guide-sec-title">Left border color &amp; status badge (top right of card) — program status</p>
+          <div class="guide-grid">
+            <div class="guide-item">
+              <div class="gi-icon gi-green">■</div>
+              <div><strong>On Track</strong><span>Progressing to plan. No active blockers. Upcoming milestones confirmed.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-red">■</div>
+              <div><strong>At Risk</strong><span>A blocker, ownership gap, or missed milestone is threatening delivery. Escalation likely needed.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-amber">■</div>
+              <div><strong>Needs Decision</strong><span>Program is stalled pending an executive approval or decision. Cannot advance until resolved.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-done">■</div>
+              <div><strong>Complete</strong><span>Delivered and closed. May be in post-launch monitoring or adoption follow-up phase.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-sec">
+          <p class="guide-sec-title">Health bar (top right of card) — overall program health score 0–100%</p>
+          <div class="guide-grid">
+            <div class="guide-item">
+              <div class="gi-icon gi-green" style="font-size:.6rem">80+</div>
+              <div><strong>Green (80–100%)</strong><span>Healthy. Milestones on track, risks actively managed, no critical gaps.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-amber" style="font-size:.55rem">60–79</div>
+              <div><strong>Amber (60–79%)</strong><span>Moderate concern. Some blockers or ownership gaps need near-term attention to avoid slippage.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-red" style="font-size:.6rem">&lt;60</div>
+              <div><strong>Red (&lt;60%)</strong><span>Significant issues present. Delivery at risk without immediate leadership intervention.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-sec">
+          <p class="guide-sec-title">Metadata fields — key program facts displayed below the description</p>
+          <div class="guide-grid">
+            <div class="guide-item">
+              <div class="gi-icon gi-soft">👤</div>
+              <div><strong>Owner</strong><span>Program lead accountable for delivery, escalation, and executive communication.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-soft">📅</div>
+              <div><strong>Target</strong><span>Planned delivery quarter or date per the current program schedule.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-soft">↗</div>
+              <div><strong>Phase / Progress</strong><span>Current stage of delivery — e.g., Wave 2 of 4, 73% of controls complete, or 6 of 8 BUs onboarded.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-soft">⏱</div>
+              <div><strong>Next Gate / Audit Gate / Q2 Milestone</strong><span>The nearest upcoming decision point, approval, or milestone that determines whether the program can advance.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-red">!</div>
+              <div><strong>Blocked / Blocker / Pending</strong><span>An active issue preventing forward progress. Shown with duration (e.g., "3 weeks") to flag how long it has been unresolved.</span></div>
+            </div>
+            <div class="guide-item">
+              <div class="gi-icon gi-done">⬡</div>
+              <div><strong>Final Gate / Final Due</strong><span>The ultimate completion milestone or end-state delivery date — what "done" looks like for this initiative.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-sec">
+          <p class="guide-sec-title">Tag chips (bottom of each card) — domain labels and live status signals</p>
+          <div class="guide-tags-col">
+            <div>
+              <div class="guide-tag-row">
+                <span class="gdemo gdemo-n">Cloud-native</span>
+                <span class="gdemo gdemo-n">Dragonboat</span>
+                <span class="gdemo gdemo-n">PMO</span>
+                <span class="gdemo gdemo-n">Compliance</span>
+              </div>
+              <p class="guide-tag-desc" style="margin-top:6px"><strong style="color:var(--ink)">White border, green text</strong> — Domain, tool, or methodology label. Identifies the technology area, platform, or delivery approach the program operates in (e.g., cloud-native architecture, AI tooling, release governance).</p>
+            </div>
+            <div>
+              <div class="guide-tag-row">
+                <span class="gdemo gdemo-w">⚠ 3 unowned services</span>
+                <span class="gdemo gdemo-w">⚠ RACI not approved</span>
+                <span class="gdemo gdemo-w">⚠ Owner unassigned</span>
+              </div>
+              <p class="guide-tag-desc" style="margin-top:6px"><strong style="color:var(--ink)">Amber background with ⚠</strong> — Active risk, blocker, or pending decision that is directly impacting this program's health score or delivery timeline. These are the items that need immediate attention.</p>
+            </div>
+            <div>
+              <div class="guide-tag-row">
+                <span class="gdemo gdemo-g">Audit gate: 22 days</span>
+                <span class="gdemo gdemo-g">Final 2 BUs: June 28</span>
+                <span class="gdemo gdemo-g">✓ Live in production</span>
+              </div>
+              <p class="guide-tag-desc" style="margin-top:6px"><strong style="color:var(--ink)">Green background</strong> — Positive status signal. Either a confirmed upcoming milestone with a countdown showing days or a date remaining, or a completed delivery milestone confirming the program met its goal.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ TAB 1: DASHBOARD ══════════════════════════════ -->
+    <div class="tab-panel active" id="tab-dashboard" role="tabpanel">
+      <div class="panel-header">
+        <p class="panel-eyebrow">Enterprise Technology Portfolio · Q2 2026</p>
+        <h1 class="panel-title">Portfolio Health Dashboard</h1>
+        <p class="panel-sub">6 active initiatives across Oracle Fusion Applications and Intuit AI Tooling programs. Tracks status, milestones, risks, blockers, and launch readiness. Last updated June 26, 2026.</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-val">6</span>
+          <p class="stat-lbl">Active initiatives</p>
+        </div>
+        <div class="stat-card s-green">
+          <span class="stat-val">3</span>
+          <p class="stat-lbl">On track</p>
+        </div>
+        <div class="stat-card s-red">
+          <span class="stat-val">2</span>
+          <p class="stat-lbl">At risk</p>
+        </div>
+        <div class="stat-card s-amber">
+          <span class="stat-val">1</span>
+          <p class="stat-lbl">Needs decision</p>
+        </div>
+        <div class="stat-card s-green">
+          <span class="stat-val">1</span>
+          <p class="stat-lbl">Complete</p>
+        </div>
+        <div class="stat-card s-red">
+          <span class="stat-val">3</span>
+          <p class="stat-lbl">Escalations pending</p>
+        </div>
+      </div>
+
+      <div class="program-grid">
+
+        <article class="program-card c-risk">
+          <div>
+            <p class="pc-org">Oracle · Fusion Applications</p>
+            <h2 class="pc-name">Fusion Cloud Modernization</h2>
+            <p class="pc-desc">Migrate 12 legacy Fusion HCM and ERP services to cloud-native microservices architecture across 8 regional data centers.</p>
+            <div class="pc-meta">
+              <div class="meta-item"><span class="meta-lbl">Owner</span><span class="meta-val">Alison Whittaker</span></div>
+              <div class="meta-item"><span class="meta-lbl">Target</span><span class="meta-val">Q4 2026</span></div>
+              <div class="meta-item"><span class="meta-lbl">Phase</span><span class="meta-val">Migration · Wave 2 of 4</span></div>
+              <div class="meta-item"><span class="meta-lbl">Next gate</span><span class="meta-val">July 5 · Wave 2 kickoff</span></div>
+              <div class="meta-item"><span class="meta-lbl">Final Due</span><span class="meta-val">Q4 2026 · All 12 services migrated</span></div>
+            </div>
+          </div>
+          <div class="pc-side">
+            <span class="status-badge sb-risk">At Risk</span>
+            <div class="health-bar">
+              <div class="hb-row"><span>Health</span><span>62%</span></div>
+              <div class="hb-track"><div class="hb-fill hf-amber" style="width:62%"></div></div>
+            </div>
+          </div>
+          <div class="pc-tags">
+            <span class="tag">Cloud-native</span>
+            <span class="tag">Microservices</span>
+            <span class="tag t-warn">⚠ 3 unowned services</span>
+            <span class="tag t-warn">⚠ Wave 2 blocked</span>
+          </div>
+        </article>
+
+        <article class="program-card c-on">
+          <div>
+            <p class="pc-org">Oracle · Government Cloud</p>
+            <h2 class="pc-name">FedRAMP High Authorization</h2>
+            <p class="pc-desc">Achieve FedRAMP High authorization for Oracle Fusion Government Cloud tenant supporting federal agency customers.</p>
+            <div class="pc-meta">
+              <div class="meta-item"><span class="meta-lbl">Owner</span><span class="meta-val">Alison Whittaker</span></div>
+              <div class="meta-item"><span class="meta-lbl">Target</span><span class="meta-val">Q3 2026</span></div>
+              <div class="meta-item"><span class="meta-lbl">Controls complete</span><span class="meta-val">73% of 325</span></div>
+              <div class="meta-item"><span class="meta-lbl">Audit gate</span><span class="meta-val">July 18 · Confirmed</span></div>
+              <div class="meta-item"><span class="meta-lbl">Final Gate</span><span class="meta-val">Q3 2026 · Authorization decision issued</span></div>
+            </div>
+          </div>
+          <div class="pc-side">
+            <span class="status-badge sb-on">On Track</span>
+            <div class="health-bar">
+              <div class="hb-row"><span>Health</span><span>84%</span></div>
+              <div class="hb-track"><div class="hb-fill" style="width:84%"></div></div>
+            </div>
+          </div>
+          <div class="pc-tags">
+            <span class="tag">Compliance</span>
+            <span class="tag">Security controls</span>
+            <span class="tag">GovCloud</span>
+            <span class="tag t-ok">Audit gate: 22 days</span>
+          </div>
+        </article>
+
+        <article class="program-card c-on">
+          <div>
+            <p class="pc-org">Intuit · Product, Engineering &amp; TPM</p>
+            <h2 class="pc-name">AI Portfolio Planning Rollout</h2>
+            <p class="pc-desc">Enterprise adoption of Dragonboat AI-enabled portfolio planning and roadmapping across 8 business units — Product, Engineering, TPM, and Business Operations.</p>
+            <div class="pc-meta">
+              <div class="meta-item"><span class="meta-lbl">Owner</span><span class="meta-val">Alison Whittaker</span></div>
+              <div class="meta-item"><span class="meta-lbl">Target</span><span class="meta-val">Q2 2026</span></div>
+              <div class="meta-item"><span class="meta-lbl">BUs onboarded</span><span class="meta-val">6 of 8</span></div>
+              <div class="meta-item"><span class="meta-lbl">Q2 milestone</span><span class="meta-val">June 30</span></div>
+              <div class="meta-item"><span class="meta-lbl">Final Gate</span><span class="meta-val">June 30, 2026 · All 8 BUs live on AI planning</span></div>
+            </div>
+          </div>
+          <div class="pc-side">
+            <span class="status-badge sb-on">On Track</span>
+            <div class="health-bar">
+              <div class="hb-row"><span>Health</span><span>91%</span></div>
+              <div class="hb-track"><div class="hb-fill" style="width:91%"></div></div>
+            </div>
+          </div>
+          <div class="pc-tags">
+            <span class="tag">AI adoption</span>
+            <span class="tag">Dragonboat</span>
+            <span class="tag">Change management</span>
+            <span class="tag t-ok">Final 2 BUs: June 28</span>
+          </div>
+        </article>
+
+        <article class="program-card c-dec">
+          <div>
+            <p class="pc-org">Intuit · TPM Organization</p>
+            <h2 class="pc-name">TPM Operating Model Redesign</h2>
+            <p class="pc-desc">Redesign TPM governance structures and delivery processes to align with AI-augmented ways of working and Dragonboat planning standards across the organization.</p>
+            <div class="pc-meta">
+              <div class="meta-item"><span class="meta-lbl">Owner</span><span class="meta-val">Alison Whittaker</span></div>
+              <div class="meta-item"><span class="meta-lbl">Target</span><span class="meta-val">Q3 2026</span></div>
+              <div class="meta-item"><span class="meta-lbl">Blocked</span><span class="meta-val">RACI approval pending</span></div>
+              <div class="meta-item"><span class="meta-lbl">Pending since</span><span class="meta-val">June 5 · 3 weeks</span></div>
+              <div class="meta-item"><span class="meta-lbl">Final Due</span><span class="meta-val">Q3 2026 · New TPM operating model live</span></div>
+            </div>
+          </div>
+          <div class="pc-side">
+            <span class="status-badge sb-dec">Needs Decision</span>
+            <div class="health-bar">
+              <div class="hb-row"><span>Health</span><span>71%</span></div>
+              <div class="hb-track"><div class="hb-fill hf-amber" style="width:71%"></div></div>
+            </div>
+          </div>
+          <div class="pc-tags">
+            <span class="tag">Operating model</span>
+            <span class="tag">Governance</span>
+            <span class="tag t-warn">⚠ RACI not approved</span>
+            <span class="tag t-warn">⚠ Q3 kickoff at risk</span>
+          </div>
+        </article>
+
+        <article class="program-card c-risk">
+          <div>
+            <p class="pc-org">Intuit · Data &amp; Analytics</p>
+            <h2 class="pc-name">Portfolio Data Quality Initiative</h2>
+            <p class="pc-desc">Establish enterprise data standards and governance for AI-powered roadmap insights and portfolio health signals within Dragonboat.</p>
+            <div class="pc-meta">
+              <div class="meta-item"><span class="meta-lbl">Owner</span><span class="meta-val">Alison Whittaker</span></div>
+              <div class="meta-item"><span class="meta-lbl">Target</span><span class="meta-val">Q2 2026</span></div>
+              <div class="meta-item"><span class="meta-lbl">Blocker</span><span class="meta-val">No governance owner</span></div>
+              <div class="meta-item"><span class="meta-lbl">Role open</span><span class="meta-val">6 weeks</span></div>
+              <div class="meta-item"><span class="meta-lbl">Final Gate</span><span class="meta-val">July 10, 2026 · Data governance owner in place</span></div>
+            </div>
+          </div>
+          <div class="pc-side">
+            <span class="status-badge sb-risk">At Risk</span>
+            <div class="health-bar">
+              <div class="hb-row"><span>Health</span><span>58%</span></div>
+              <div class="hb-track"><div class="hb-fill hf-red" style="width:58%"></div></div>
+            </div>
+          </div>
+          <div class="pc-tags">
+            <span class="tag">Data governance</span>
+            <span class="tag">AI enablement</span>
+            <span class="tag t-warn">⚠ Blocks Q3 AI features</span>
+            <span class="tag t-warn">⚠ Owner unassigned</span>
+          </div>
+        </article>
+
+        <article class="program-card c-done">
+          <div>
+            <p class="pc-org">Oracle · Engineering Operations</p>
+            <h2 class="pc-name">Release Governance Framework</h2>
+            <p class="pc-desc">Standardized release cadence, quality gates, and governance operating model across 40+ global engineering organizations supporting Oracle Fusion Applications.</p>
+            <div class="pc-meta">
+              <div class="meta-item"><span class="meta-lbl">Owner</span><span class="meta-val">Alison Whittaker</span></div>
+              <div class="meta-item"><span class="meta-lbl">Completed</span><span class="meta-val">Q1 2026</span></div>
+              <div class="meta-item"><span class="meta-lbl">Orgs aligned</span><span class="meta-val">40+ engineering orgs</span></div>
+              <div class="meta-item"><span class="meta-lbl">Adoption</span><span class="meta-val">88% live on new model</span></div>
+              <div class="meta-item"><span class="meta-lbl">Final Gate</span><span class="meta-val">Q1 2026 · ✓ Closed &amp; in production</span></div>
+            </div>
+          </div>
+          <div class="pc-side">
+            <span class="status-badge sb-done">Complete</span>
+            <div class="health-bar">
+              <div class="hb-row"><span>Health</span><span>100%</span></div>
+              <div class="hb-track"><div class="hb-fill" style="width:100%"></div></div>
+            </div>
+          </div>
+          <div class="pc-tags">
+            <span class="tag">Release governance</span>
+            <span class="tag">PMO</span>
+            <span class="tag">Engineering ops</span>
+            <span class="tag t-ok">✓ Live in production</span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+
+    <!-- ══ TAB 2: AI EXECUTIVE SUMMARY ══════════════════ -->
+    <div class="tab-panel" id="tab-summary" role="tabpanel">
+      <div class="panel-header">
+        <p class="panel-eyebrow">✦ AI-Generated</p>
+        <h1 class="panel-title">AI Executive Summary</h1>
+        <p class="panel-sub">Weekly portfolio update synthesized from program status, milestone data, RAID logs, and risk patterns. Ready for executive distribution.</p>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-card-head">
+          <div>
+            <span class="ai-label">✦ AI Portfolio Summary</span>
+            <h2>Week of June 22–28, 2026</h2>
+            <p class="ai-date">Enterprise Technology Portfolio · Generated June 26, 2026 · Prepared by Alison Whittaker, EPM</p>
+          </div>
+          <span class="status-pill sp-amber">⚠ Attention Required</span>
+        </div>
+
+        <div class="sum-sec">
+          <h3>Portfolio at a Glance</h3>
+          <p>The portfolio carries <strong>2 programs at risk</strong> this week, with <strong>1 decision escalation outstanding for 3+ weeks</strong>. Of 6 active initiatives, 1 is complete, 3 are on track, and 2 require immediate executive action. Overall portfolio health is <strong>74%</strong>, down 4 points from last week as the Portfolio Data Quality Initiative continues to slip without a named governance owner.</p>
+        </div>
+
+        <div class="sum-sec">
+          <h3>Progress Highlights</h3>
+          <p><strong>AI Portfolio Planning Rollout (91% health)</strong> completed BU onboarding for 6 of 8 business units this week, ahead of the June 30 Q2 milestone. Tax Platform and Financial Services sessions are confirmed for June 28. This program is the strongest performer in the portfolio and on track to close Q2 on time.</p>
+          <p><strong>FedRAMP High Authorization (84% health)</strong> remains on track. Security control documentation is 73% complete across 325 controls, the third-party audit partner has been contracted, and the July 18 security gate is confirmed. No active blockers, though a contingency plan for Tier 1 control gaps has not yet been documented.</p>
+          <p><strong>Release Governance Framework</strong> officially closed Q1 2026. Standardized release cadence and quality gates are now live across all 40+ engineering organizations. Post-implementation survey shows 88% adoption — follow-up is planned for the remaining 5 teams (12%) in July.</p>
+        </div>
+
+        <div class="sum-sec">
+          <h3>Risks &amp; Blockers</h3>
+          <p><strong>Fusion Cloud Modernization (62% health, At Risk):</strong> 3 of 12 services — Payroll, Benefits, and Tax Calculation — remain without assigned migration owners. Wave 2 kickoff is July 5. Without owner assignment this week, the program slips to Q1 2027 delivery. This risk was first flagged 2 weeks ago with no resolution. Engineering VP escalation is required immediately.</p>
+          <p><strong>Portfolio Data Quality Initiative (58% health, At Risk):</strong> The data governance owner role has been open for 6 weeks with no appointment. This blocks AI roadmap feature activation for all 8 business units in Q3 and degrades Dragonboat AI signal accuracy. This appointment needs leadership action by July 10 to protect Q3 commitments.</p>
+        </div>
+
+        <div class="sum-sec">
+          <h3>Decisions Required This Week</h3>
+          <div class="dec-list">
+            <div class="dec-item">
+              <span class="dec-num">1</span>
+              <p><strong>Fusion Cloud Modernization:</strong> Engineering VP to assign migration owners for Payroll, Benefits, and Tax Calculation services before July 5. <em>Risk if unresolved: Wave 2 delivery slips 2 quarters to Q1 2027.</em></p>
+            </div>
+            <div class="dec-item">
+              <span class="dec-num">2</span>
+              <p><strong>Portfolio Data Quality Initiative:</strong> VP of Data to appoint data governance owner. Role has been open 6 weeks. <em>Risk if unresolved: Q3 AI roadmap features blocked for all 8 business units.</em></p>
+            </div>
+            <div class="dec-item">
+              <span class="dec-num">3</span>
+              <p><strong>TPM Operating Model Redesign:</strong> Executive sponsor needed to approve updated RACI. Outstanding 3 weeks. <em>Risk if unresolved: Q3 kickoff cannot proceed — program enters delay.</em></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="sum-sec">
+          <h3>Looking Ahead — Week of June 29</h3>
+          <p>Two high-priority milestones land next week: <strong>AI Planning Rollout Q2 milestone (June 30)</strong> — confirmed on track — and the <strong>Fusion Cloud Modernization Wave 2 kickoff (July 5)</strong> — currently blocked. Recommend a 30-minute executive decision call by June 28 to resolve the Wave 2 ownership gap and unblock the RACI approval for TPM Operating Model. FedRAMP audit gate on July 18 remains 22 days out with no current blockers.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB 3: RISK & DEPENDENCY ANALYZER ════════════ -->
+    <div class="tab-panel" id="tab-risks" role="tabpanel">
+      <div class="panel-header">
+        <p class="panel-eyebrow">✦ AI-Analyzed</p>
+        <h1 class="panel-title">Risk &amp; Dependency Analyzer</h1>
+        <p class="panel-sub">AI-flagged risks, hidden dependencies, ownership gaps, and missing launch criteria — synthesized from RAID logs, milestone data, and cross-program patterns.</p>
+      </div>
+
+      <div class="hidden-banner">
+        <span class="hb-icon">⚠</span>
+        <div class="hb-body">
+          <strong>2 hidden risks identified by AI</strong>
+          <p>These risks were not present in existing RAID logs. AI surfaced them by analyzing milestone dependencies, ownership gaps, and cross-program data patterns. Marked below with <span style="display:inline-flex;align-items:center;padding:1px 6px;border-radius:4px;background:var(--lime);color:var(--forest);font-size:.65rem;font-weight:800;margin:0 2px;">✦ AI</span>.</p>
+        </div>
+      </div>
+
+      <div class="risk-wrap">
+        <table class="risk-tbl">
+          <thead>
+            <tr>
+              <th>Program</th>
+              <th>Risk / Issue</th>
+              <th>Type</th>
+              <th>Severity</th>
+              <th>Owner</th>
+              <th>Due</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Fusion Cloud Modernization</td>
+              <td>3 of 12 services (Payroll, Benefits, Tax Calculation) have no assigned migration owner. Blocks Wave 2 kickoff July 5.</td>
+              <td>Ownership gap</td>
+              <td><span class="sev sev-h">● High</span></td>
+              <td>Engineering VP</td>
+              <td>July 5</td>
+              <td>RAID log</td>
+            </tr>
+            <tr>
+              <td>Portfolio Data Quality</td>
+              <td>Data governance owner role open 6 weeks. Blocks Q3 AI roadmap feature activation for all 8 BUs.</td>
+              <td>Blocker</td>
+              <td><span class="sev sev-h">● High</span></td>
+              <td>Unassigned</td>
+              <td>July 10</td>
+              <td>RAID log</td>
+            </tr>
+            <tr>
+              <td>TPM Operating Model</td>
+              <td>RACI approval pending 3 weeks with no documented decision timeline or named exec sponsor.</td>
+              <td>Decision gap</td>
+              <td><span class="sev sev-h">● High</span></td>
+              <td>VP Engineering</td>
+              <td>June 30</td>
+              <td>RAID log</td>
+            </tr>
+            <tr>
+              <td>AI Planning Rollout</td>
+              <td>2 of 8 BU leads (Tax Platform, Financial Services) have not completed platform training. Rollout gate June 30.</td>
+              <td>Readiness gap</td>
+              <td><span class="sev sev-m">● Medium</span></td>
+              <td>Alison Whittaker</td>
+              <td>June 28</td>
+              <td>RAID log</td>
+            </tr>
+            <tr>
+              <td>FedRAMP Authorization <span class="ai-tag">✦ AI</span></td>
+              <td><em>AI-identified:</em> No contingency plan documented if July 18 audit surfaces a Tier 1 control gap. A gap would push authorization to Q1 2027 with no current mitigation path.</td>
+              <td>Hidden risk</td>
+              <td><span class="sev sev-m">● Medium</span></td>
+              <td>Alison Whittaker</td>
+              <td>July 14</td>
+              <td>AI analysis</td>
+            </tr>
+            <tr>
+              <td>Fusion Cloud Modernization <span class="ai-tag">✦ AI</span></td>
+              <td><em>AI-identified:</em> Payroll and Tax Calculation services share a legacy batch processing dependency undocumented in any RAID log. Creates hidden coordination risk across 3 engineering teams if migration timelines diverge.</td>
+              <td>Hidden dependency</td>
+              <td><span class="sev sev-m">● Medium</span></td>
+              <td>Unassigned</td>
+              <td>ASAP</td>
+              <td>AI analysis</td>
+            </tr>
+            <tr>
+              <td>Release Governance Framework</td>
+              <td>Post-implementation adoption at 88%. 5 teams (12%) still running legacy processes with no documented follow-up plan.</td>
+              <td>Adoption gap</td>
+              <td><span class="sev sev-l">● Low</span></td>
+              <td>Alison Whittaker</td>
+              <td>July 31</td>
+              <td>Survey data</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dep-card">
+        <h3>✦ AI Cross-Program Dependency Map</h3>
+        <p>Dependencies identified by AI that span multiple programs — not captured in individual RAID logs.</p>
+        <div class="dep-list">
+          <div class="dep-item">
+            <span>🔗</span>
+            <span><strong>Portfolio Data Quality → AI Planning Rollout:</strong> Data quality standards must be approved and a governance owner in place before Dragonboat AI signals can be validated. A delay here pushes AI signal activation from Q3 to Q4 — affecting 8 BUs simultaneously.</span>
+          </div>
+          <div class="dep-item">
+            <span>🔗</span>
+            <span><strong>TPM Operating Model → AI Planning Rollout:</strong> RACI approval is required before TPM governance workflows can be embedded in Dragonboat. Without it, the AI planning rollout achieves partial adoption — TPM teams cannot fully participate in AI-enabled planning.</span>
+          </div>
+          <div class="dep-item">
+            <span>🔗</span>
+            <span><strong>Fusion Cloud Modernization → FedRAMP Authorization:</strong> If the Payroll service migration is delayed past July 5, it may impact FedRAMP control evidence submitted for the July 18 audit. The Payroll service migration generates required security evidence for 3 authorization controls.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB 4: READINESS SCORECARD ═══════════════════ -->
+    <div class="tab-panel" id="tab-scorecard" role="tabpanel">
+      <div class="panel-header">
+        <p class="panel-eyebrow">✦ AI-Scored</p>
+        <h1 class="panel-title">Readiness Scorecard</h1>
+        <p class="panel-sub">Each initiative scored across health, risk exposure, launch readiness, and open decisions. Scores are derived from program data, RAID logs, and milestone proximity.</p>
+      </div>
+
+      <div class="sc-wrap">
+        <table class="sc-tbl">
+          <thead>
+            <tr>
+              <th>Initiative</th>
+              <th class="center">Health</th>
+              <th class="center">Risk Level</th>
+              <th class="center">Readiness</th>
+              <th class="center">Decisions</th>
+              <th>AI Recommendation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="sc-name">Fusion Cloud Modernization</div>
+                <div class="sc-org">Oracle · Q4 2026</div>
+              </td>
+              <td class="center"><span class="chip chip-a">62%</span></td>
+              <td class="center"><span class="chip chip-r">High</span></td>
+              <td class="center"><span class="chip chip-r">41%</span></td>
+              <td class="center"><span class="chip chip-r">3 open</span></td>
+              <td class="rec-cell">Escalate ownership gaps to Engineering VP before July 5. Do not proceed to Wave 2 without all 3 service owners assigned.</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="sc-name">FedRAMP High Authorization</div>
+                <div class="sc-org">Oracle · Q3 2026</div>
+              </td>
+              <td class="center"><span class="chip chip-g">84%</span></td>
+              <td class="center"><span class="chip chip-a">Medium</span></td>
+              <td class="center"><span class="chip chip-g">78%</span></td>
+              <td class="center"><span class="chip chip-g">0 open</span></td>
+              <td class="rec-cell">On track for July 18 gate. Document a contingency plan for a Tier 1 control gap scenario before the audit date.</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="sc-name">AI Portfolio Planning Rollout</div>
+                <div class="sc-org">Intuit · Q2 2026</div>
+              </td>
+              <td class="center"><span class="chip chip-g">91%</span></td>
+              <td class="center"><span class="chip chip-g">Low</span></td>
+              <td class="center"><span class="chip chip-g">89%</span></td>
+              <td class="center"><span class="chip chip-g">0 open</span></td>
+              <td class="rec-cell">Ready to close Q2 milestone June 30. Complete final 2 BU training sessions by June 28. No blockers.</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="sc-name">TPM Operating Model Redesign</div>
+                <div class="sc-org">Intuit · Q3 2026</div>
+              </td>
+              <td class="center"><span class="chip chip-a">71%</span></td>
+              <td class="center"><span class="chip chip-a">Medium</span></td>
+              <td class="center"><span class="chip chip-a">55%</span></td>
+              <td class="center"><span class="chip chip-r">1 open</span></td>
+              <td class="rec-cell">RACI decision is blocking Q3 kickoff. Identify executive sponsor and secure approval by June 30 or program enters delay.</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="sc-name">Portfolio Data Quality Initiative</div>
+                <div class="sc-org">Intuit · Q2 2026</div>
+              </td>
+              <td class="center"><span class="chip chip-r">58%</span></td>
+              <td class="center"><span class="chip chip-r">High</span></td>
+              <td class="center"><span class="chip chip-r">32%</span></td>
+              <td class="center"><span class="chip chip-r">2 open</span></td>
+              <td class="rec-cell">Not ready for Q2 close. Data governance owner appointment is the critical path. Delays all downstream Q3 AI features for 8 BUs.</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="sc-name">Release Governance Framework</div>
+                <div class="sc-org">Oracle · Completed Q1 2026</div>
+              </td>
+              <td class="center"><span class="chip chip-g">100%</span></td>
+              <td class="center"><span class="chip chip-g">Low</span></td>
+              <td class="center"><span class="chip chip-n">N/A</span></td>
+              <td class="center"><span class="chip chip-g">0 open</span></td>
+              <td class="rec-cell">Complete. Plan adoption follow-up for 5 remaining teams (12%) not yet live on the new governance model by July 31.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sc-legend">
+        <div class="sl-item"><div class="sl-dot" style="background:var(--lime)"></div><span>Healthy / Low risk / Ready</span></div>
+        <div class="sl-item"><div class="sl-dot" style="background:var(--amber-soft);border:1px solid #e8c87a"></div><span>Moderate — attention needed</span></div>
+        <div class="sl-item"><div class="sl-dot" style="background:var(--red-soft);border:1px solid #f5c6c0"></div><span>Immediate action required</span></div>
+      </div>
+    </div>
+
+    <!-- ══ TAB 5: MEETING FOLLOW-UP ══════════════════════ -->
+    <div class="tab-panel" id="tab-meeting" role="tabpanel">
+      <div class="panel-header">
+        <p class="panel-eyebrow">✦ AI-Powered</p>
+        <h1 class="panel-title">Meeting Follow-Up Automation</h1>
+        <p class="panel-sub">Paste raw meeting notes below. AI extracts action items with owners and dates, decisions made, open questions, and flags for follow-up.</p>
+      </div>
+
+      <div class="meeting-grid">
+        <div class="meet-card">
+          <h3>Paste Meeting Notes</h3>
+          <p>Raw notes, transcript excerpt, or summary from any planning, status, or governance meeting.</p>
+          <textarea id="meeting-notes" placeholder="Example:&#10;&#10;Portfolio sync — June 26, 2026&#10;Attendees: Alison Whittaker, VP Engineering, VP Data, Exec Sponsor&#10;&#10;Alison: Wave 2 kickoff for Fusion Cloud Modernization is at risk. Three services still don't have migration owners — Payroll, Benefits, Tax Calc. Need Engineering VP to assign owners before July 5 or we slip a full quarter.&#10;&#10;Alison: FedRAMP audit partner contracted, July 18 gate is firm. Raised whether we have a contingency if a Tier 1 control gap is found. Will document fallback plan by July 14.&#10;&#10;Alison: Data governance owner still not appointed after 6 weeks. Sending decision request to VP of Data by June 28. Blocks Q3 AI features for all 8 BUs if not resolved.&#10;&#10;Alison: RACI for TPM Operating Model needs exec approval before Q3 kickoff. Outstanding 3 weeks — need exec sponsor identified by June 28.&#10;&#10;AI Planning Rollout update: 6 of 8 BUs onboarded. Final 2 sessions June 28. On track to close Q2 milestone June 30."></textarea>
+          <button class="analyze-btn" id="analyze-btn" onclick="analyzeNotes()">
+            <span aria-hidden="true">✦</span> Analyze Notes
+          </button>
+        </div>
+
+        <div class="meet-card">
+          <h3>AI-Generated Follow-Up</h3>
+          <p>Structured output extracted from your meeting notes.</p>
+
+          <div class="load-bar" id="load-bar" role="progressbar" aria-label="Analyzing notes">
+            <div class="lb-fill"></div>
+          </div>
+
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon" aria-hidden="true">✦</div>
+            <p>Paste notes and click <strong>Analyze Notes</strong> to generate structured follow-up.</p>
+          </div>
+
+          <div class="out-section" id="out-section" aria-live="polite">
+
+            <div class="out-group">
+              <h4>Action Items</h4>
+              <div class="out-item">
+                <span class="out-item-icon" aria-hidden="true">✓</span>
+                <div class="out-item-body">
+                  <strong>Assign migration owners for Payroll, Benefits &amp; Tax Calculation services</strong>
+                  <span>Owner: Engineering VP · Due: July 5 · Priority: High · Program: Fusion Cloud Modernization</span>
+                </div>
+              </div>
+              <div class="out-item">
+                <span class="out-item-icon" aria-hidden="true">✓</span>
+                <div class="out-item-body">
+                  <strong>Send data governance owner decision request to VP of Data</strong>
+                  <span>Owner: Alison Whittaker · Due: June 28 · Priority: High · Program: Portfolio Data Quality</span>
+                </div>
+              </div>
+              <div class="out-item">
+                <span class="out-item-icon" aria-hidden="true">✓</span>
+                <div class="out-item-body">
+                  <strong>Complete final 2 BU onboarding sessions — Tax Platform &amp; Financial Services</strong>
+                  <span>Owner: Alison Whittaker · Due: June 28 · Priority: Medium · Program: AI Planning Rollout</span>
+                </div>
+              </div>
+              <div class="out-item">
+                <span class="out-item-icon" aria-hidden="true">✓</span>
+                <div class="out-item-body">
+                  <strong>Identify executive sponsor and escalate RACI approval for TPM Operating Model</strong>
+                  <span>Owner: Alison Whittaker · Due: June 30 · Priority: High · Program: TPM Operating Model</span>
+                </div>
+              </div>
+              <div class="out-item">
+                <span class="out-item-icon" aria-hidden="true">✓</span>
+                <div class="out-item-body">
+                  <strong>Document FedRAMP contingency plan for Tier 1 control gap scenario</strong>
+                  <span>Owner: Alison Whittaker · Due: July 14 · Priority: Medium · Program: FedRAMP Authorization</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="out-group">
+              <h4>Decisions Made</h4>
+              <div class="out-item">
+                <span class="out-item-icon" aria-hidden="true">◎</span>
+                <div class="out-item-body">
+                  <strong>FedRAMP July 18 audit gate confirmed as firm — no extension sought</strong>
+                  <span>Decision maker: Alison Whittaker · June 26, 2026</span>
+                </div>
+              </div>
+              <div class="out-item">
+                <span class="out-item-icon" aria-hidden="true">◎</span>
+                <div class="out-item-body">
+                  <strong>Data quality escalation path approved — Alison to contact VP of Data directly</strong>
+                  <span>Decision maker: Alison Whittaker · June 26, 2026</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="out-group">
+              <h4>Open Questions</h4>
+              <div class="out-item">
+                <span class="out-item-icon" aria-hidden="true">?</span>
+                <div class="out-item-body">
+                  <strong>What is the contingency plan if a Tier 1 FedRAMP control gap is found at the July 18 audit?</strong>
+                  <span>Raised by: Alison Whittaker · Needs answer by: July 14 · Program: FedRAMP Authorization</span>
+                </div>
+              </div>
+              <div class="out-item">
+                <span class="out-item-icon" aria-hidden="true">?</span>
+                <div class="out-item-body">
+                  <strong>Who is the executive sponsor for the TPM Operating Model RACI approval?</strong>
+                  <span>Raised by: Alison Whittaker · Blocking: Q3 kickoff · Program: TPM Operating Model</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="out-group">
+              <h4>✦ AI Flags</h4>
+              <div class="out-item flag">
+                <span class="out-item-icon" aria-hidden="true">⚠</span>
+                <div class="out-item-body">
+                  <strong>5 of 5 action items are owned by Alison Whittaker — single point of dependency across all programs</strong>
+                  <span>Consider delegating or sequencing tasks to reduce risk concentration. High-priority items due June 28 and July 5 are simultaneous.</span>
+                </div>
+              </div>
+              <div class="out-item flag">
+                <span class="out-item-icon" aria-hidden="true">⚠</span>
+                <div class="out-item-body">
+                  <strong>RACI escalation pending 3 weeks — no executive sponsor identified in the notes</strong>
+                  <span>AI recommends adding "Identify exec sponsor" as a prerequisite action item before June 28, not June 30.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="padding:24px 32px;border-top:1px solid var(--line);background:var(--surface);margin-top:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;max-width:1180px;margin:0 auto;">
+      <p style="margin:0;font-size:.75rem;color:var(--muted);">AI Portfolio Health &amp; Launch Readiness Dashboard · Alison Whittaker · Working Prototype</p>
+      <a href="index.html" style="font-size:.75rem;color:var(--accent);font-weight:700;">← Back to portfolio</a>
+    </div>
+  </footer>
+
+  <script>
+    // Card guide toggle
+    function toggleGuide(btn) {
+      const body = document.getElementById('guide-body');
+      const open = body.classList.toggle('open');
+      btn.textContent = open ? 'Hide guide ↑' : 'How to read each card ↓';
+      btn.setAttribute('aria-expanded', String(open));
+    }
+
+    // Tab switching
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected','true');
+        const panel = document.getElementById('tab-' + btn.dataset.tab);
+        if (panel) panel.classList.add('active');
+      });
+    });
+
+    // Meeting analysis simulation
+    function analyzeNotes() {
+      const btn = document.getElementById('analyze-btn');
+      const bar = document.getElementById('load-bar');
+      const empty = document.getElementById('empty-state');
+      const out = document.getElementById('out-section');
+
+      btn.disabled = true;
+      btn.textContent = 'Analyzing…';
+      if (empty) empty.style.display = 'none';
+      bar.classList.add('running');
+
+      // Replace load bar's fill to restart animation
+      const fill = bar.querySelector('.lb-fill');
+      const newFill = fill.cloneNode(true);
+      bar.replaceChild(newFill, fill);
+
+      setTimeout(() => {
+        bar.classList.remove('running');
+        out.classList.add('vis');
+        btn.disabled = false;
+        btn.innerHTML = '<span aria-hidden="true">✦</span> Re-analyze';
+      }, 1900);
+    }
+  </script>
+</body>
+</html>
